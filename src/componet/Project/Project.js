@@ -33,7 +33,7 @@ function Project({ type }) {
                                     <ul>
                                         <li>
                                             <figure>
-                                                <img src={require("../../assets/images/assembly-verification.png")} />
+                                                <img src={require("../../assets/images/assembly-verification.webp")} />
                                             </figure>
                                         </li>
                                         
@@ -83,7 +83,7 @@ function Project({ type }) {
                                     <ul>
                                         <li>
                                             <figure>
-                                                <img src={require("../../assets/images/defect-detection.png")} />
+                                                <img src={require("../../assets/images/defect-detection.webp")} />
                                             </figure>
                                         </li>
                                        
@@ -135,7 +135,7 @@ function Project({ type }) {
                                     <ul>
                                         <li>
                                             <figure>
-                                                <img src={require("../../assets/images/counting.png")} />
+                                                <img src={require("../../assets/images/counting.webp")} />
                                             </figure>
                                         </li>
                                       
@@ -184,7 +184,7 @@ function Project({ type }) {
                                     <ul>
                                         <li>
                                             <figure>
-                                                <img src={require("../../assets/images/ocr.png")} />
+                                                <img src={require("../../assets/images/ocr.webp")} />
                                             </figure>
                                         </li>
                                         

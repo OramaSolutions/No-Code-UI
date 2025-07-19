@@ -3184,17 +3184,27 @@ input[type="date"] {
 
 .SelectModelBox aside ul {
   display: flex;
-  margin: 0 0 15px 0;
+  margin: 0 0 25px 0;
 }
 
 .SelectModelBox aside ul li {
-  width: calc(100% / 3 - 20px);
+  width: 100%;
   margin: 0px 10px;
+  max-height: 11rem;
 }
 
 .SelectModelBox aside ul li figure {
-  margin: 0;
+
+  max-height: 11rem;
 }
+
+.SelectModelBox aside ul li figure img {
+ 
+  max-height: 11rem;
+  width: 100%;
+  border-radius: 10px;
+}
+
 
 .SelectModelBox aside ul li:first-child {
   margin-left: 0px;

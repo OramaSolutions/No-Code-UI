@@ -24,17 +24,19 @@ const initialState = {
     closeImport: false,
 }
 
-function Classlabelled({ iState, updateIstate,userData,state, onApply,onChange }) {
+function Classlabelled({ iState, updateIstate, userData, state, onApply, onChange }) {
     const [istate, setIstate] = useState(initialState)
     const { imageUrls, imageFolder, loading, resizecheck, width, open, close, openImport, closeImport } = istate;
     const [selectedFile, setSelectedFile] = useState(null);
     const abortControllerReff = useRef();
     const [isDirty, setIsDirty] = useState("")
+    const [loadingData, setLoadingData] = useState(false)
     const dispatch = useDispatch();
 
     useEffect(() => {
         const fetchAndSaveStreamingZip = async () => {
             try {
+                setLoadingData(true)
                 const response = await fetch(`${url}return_import_dataset_cls?username=${userData?.activeUser?.name}&task=classification&project=${state?.name}&version=${state?.version}`, {
                     method: 'GET',
                 });
@@ -56,15 +58,17 @@ function Classlabelled({ iState, updateIstate,userData,state, onApply,onChange }
                 setIsDirty(filename)
                 setSelectedFile(dummyData);
                 processZipFileInWorker(dummyData);
+                setLoadingData(false)
             } catch (err) {
                 console.log(err, "errrrrr")
+                setLoadingData(false)
             }
         }
         fetchAndSaveStreamingZip();
     }, [])
 
     const onDrop = useCallback((acceptedFiles) => {
-        const file = acceptedFiles[0];       
+        const file = acceptedFiles[0];
         if (!file) {
             toast.error("No file selected. Please select a ZIP file", commomObj);
             return;
@@ -117,7 +121,7 @@ function Classlabelled({ iState, updateIstate,userData,state, onApply,onChange }
         try {
             abortControllerReff.current = new AbortController();
             setIstate({ ...istate, open: true });
-            const response = await dispatch(ResizeFolder({ payload:formData, signal: abortControllerReff.current.signal, url }))          
+            const response = await dispatch(ResizeFolder({ payload: formData, signal: abortControllerReff.current.signal, url }))
             if (response?.payload?.code === 200) {
                 toast.success("Resize Successfully", commomObj)
                 setIstate({ ...istate, open: true, close: true })
@@ -169,7 +173,7 @@ function Classlabelled({ iState, updateIstate,userData,state, onApply,onChange }
         try {
             abortControllerReff.current = new AbortController();
             setIstate({ ...istate, openImport: true })
-            const response = await dispatch(importClassData({ payload:formData, signal: abortControllerReff.current.signal, url }))
+            const response = await dispatch(importClassData({ payload: formData, signal: abortControllerReff.current.signal, url }))
             console.log("Response From Class Dataset Import", response);
             if (response?.payload?.status === 201) {
                 setIstate({ ...istate, openImport: false })
@@ -202,6 +206,11 @@ function Classlabelled({ iState, updateIstate,userData,state, onApply,onChange }
             console.log('Resize operation aborted');
         }
     };
+
+    if (loadingData) {
+        return <div className="Small-Wrapper"><Loader /></div>;
+    }
+
     return (
         <div>
             <div className="Small-Wrapper">

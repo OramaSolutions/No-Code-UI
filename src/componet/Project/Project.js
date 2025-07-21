@@ -3,7 +3,7 @@ import Sidenav from '../../commonComponent/Sidenav'
 import Header from '../../commonComponent/Header'
 import { Link } from 'react-router-dom'
 import CreateProject from './CreateProject'
-
+import { FaCheck } from "react-icons/fa";
 const initialState = {
     open: false,
     model: "",
@@ -26,25 +26,17 @@ function Project({ type }) {
                         <h4 className="NewTitle">Select Model</h4>
                     </div>}
                     <div className="row">
+                    {/* object detection */}
                         <div className="col-lg-6">
                             <div className="SelectModelBox">
                                 <aside>
                                     <ul>
                                         <li>
                                             <figure>
-                                                <img src={require("../../assets/images/model-1.png")} />
+                                                <img src={require("../../assets/images/assembly-verification.webp")} />
                                             </figure>
                                         </li>
-                                        <li>
-                                            <figure>
-                                                <img src={require("../../assets/images/model-1.png")} />
-                                            </figure>
-                                        </li>
-                                        <li>
-                                            <figure>
-                                                <img src={require("../../assets/images/model-1.png")} />
-                                            </figure>
-                                        </li>
+                                        
                                     </ul>
                                 </aside>
                                 <h5>Object Detection</h5>
@@ -55,19 +47,19 @@ function Project({ type }) {
                                     <ul>
                                         <li>
                                             <span>
-                                                <img src={require("../../assets/images/right.png")} />
+                                                <FaCheck className="text-blue-500 w-5 h-5" />
                                             </span>
                                             <label>Use labeled data in YOLO format</label>
                                         </li>
                                         <li>
                                             <span>
-                                                <img src={require("../../assets/images/right.png")} />
+                                                <FaCheck className="text-blue-500 w-5 h-5" />
                                             </span>
                                             <label>Require a minimum of 300 images for training</label>
                                         </li>
                                         <li>
                                             <span>
-                                                <img src={require("../../assets/images/right.png")} />
+                                                <FaCheck className="text-blue-500 w-5 h-5" />
                                             </span>
                                             <label>
                                                 Ensure proper labeling of objects without any errors
@@ -83,25 +75,18 @@ function Project({ type }) {
                                 </article>
                             </div>
                         </div>
+
+                        {/* Defect Detection */}
                         <div className="col-lg-6">
                             <div className="SelectModelBox">
                                 <aside>
                                     <ul>
                                         <li>
                                             <figure>
-                                                <img src={require("../../assets/images/model-1.png")} />
+                                                <img src={require("../../assets/images/defect-detection.webp")} />
                                             </figure>
                                         </li>
-                                        <li>
-                                            <figure>
-                                                <img src={require("../../assets/images/model-1.png")} />
-                                            </figure>
-                                        </li>
-                                        <li>
-                                            <figure>
-                                                <img src={require("../../assets/images/model-1.png")} />
-                                            </figure>
-                                        </li>
+                                       
                                     </ul>
                                 </aside>
                                 <h5>Defect Detection</h5>
@@ -110,7 +95,7 @@ function Project({ type }) {
                                     <ul>
                                         <li>
                                             <span>
-                                                <img src={require("../../assets/images/right.png")} />
+                                                <FaCheck className="text-blue-500 w-5 h-5" />
                                             </span>
                                             <label>
                                                 Prepare a dataset organized in four folders: good_train,
@@ -119,13 +104,13 @@ function Project({ type }) {
                                         </li>
                                         <li>
                                             <span>
-                                                <img src={require("../../assets/images/right.png")} />
+                                                <FaCheck className="text-blue-500 w-5 h-5" />
                                             </span>
                                             <label>Each folder should contain 30 images.</label>
                                         </li>
                                         <li>
                                             <span>
-                                                <img src={require("../../assets/images/right.png")} />
+                                                <FaCheck className="text-blue-500 w-5 h-5" />
                                             </span>
                                             <label>
                                                 e folder name should be same as project name and the good/bad
@@ -142,25 +127,18 @@ function Project({ type }) {
                                 </article>
                             </div>
                         </div>
+
+                        {/* Classification */}
                         <div className="col-lg-6">
                             <div className="SelectModelBox">
                                 <aside>
                                     <ul>
                                         <li>
                                             <figure>
-                                                <img src={require("../../assets/images/model-1.png")} />
+                                                <img src={require("../../assets/images/counting.webp")} />
                                             </figure>
                                         </li>
-                                        <li>
-                                            <figure>
-                                                <img src={require("../../assets/images/model-1.png")} />
-                                            </figure>
-                                        </li>
-                                        <li>
-                                            <figure>
-                                                <img src={require("../../assets/images/model-1.png")} />
-                                            </figure>
-                                        </li>
+                                      
                                     </ul>
                                 </aside>
                                 <h5>Classification</h5>
@@ -169,25 +147,25 @@ function Project({ type }) {
                                     <ul>
                                         <li>
                                             <span>
-                                                <img src={require("../../assets/images/right.png")} />
+                                                <FaCheck className="text-blue-500 w-5 h-5" />
                                             </span>
                                             Train and Visualize Metrics.
                                         </li>
                                         <li>
                                             <span>
-                                                <img src={require("../../assets/images/right.png")} />
+                                                <FaCheck className="text-blue-500 w-5 h-5" />
                                             </span>
                                             Train and Visualize Metrics.
                                         </li>
                                         <li>
                                             <span>
-                                                <img src={require("../../assets/images/right.png")} />
+                                                <FaCheck className="text-blue-500 w-5 h-5" />
                                             </span>
                                             Train and Visualize Metrics.
                                         </li>
                                         <li>
                                             <span>
-                                                <img src={require("../../assets/images/right.png")} />
+                                                <FaCheck className="text-blue-500 w-5 h-5" />
                                             </span>
                                             Evaluate on Saved Images &amp; Camera
                                         </li>
@@ -199,25 +177,17 @@ function Project({ type }) {
                                 </article>
                             </div>
                         </div>
+                        {/* Text Extraction */}
                         <div className="col-lg-6">
                             <div className="SelectModelBox">
                                 <aside>
                                     <ul>
                                         <li>
                                             <figure>
-                                                <img src={require("../../assets/images/model-1.png")} />
+                                                <img src={require("../../assets/images/ocr.webp")} />
                                             </figure>
                                         </li>
-                                        <li>
-                                            <figure>
-                                                <img src={require("../../assets/images/model-1.png")} />
-                                            </figure>
-                                        </li>
-                                        <li>
-                                            <figure>
-                                                <img src={require("../../assets/images/model-1.png")} />
-                                            </figure>
-                                        </li>
+                                        
                                     </ul>
                                 </aside>
                                 <h5>Text Extraction</h5>
@@ -226,20 +196,20 @@ function Project({ type }) {
                                     <ul>
                                         <li>
                                             <span>
-                                                <img src={require("../../assets/images/right.png")} />
+                                                <FaCheck className="text-blue-500 w-5 h-5" />
                                             </span>
                                             Add labelled data containing images of text and corresponding
                                             text labels
                                         </li>
                                         <li>
                                             <span>
-                                                <img src={require("../../assets/images/right.png")} />
+                                                <FaCheck className="text-blue-500 w-5 h-5" />
                                             </span>
                                             Train the Detector and the Recognizer
                                         </li>
                                         <li>
                                             <span>
-                                                <img src={require("../../assets/images/right.png")} />
+                                                <FaCheck className="text-blue-500 w-5 h-5" />
                                             </span>
                                             Test on Images with options to alter settings
                                         </li>

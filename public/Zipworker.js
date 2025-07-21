@@ -1,9 +1,9 @@
 
 /* eslint-disable no-restricted-globals */
-import JSZip from 'jszip';
-
+// import JSZip from 'jszip';
+importScripts('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
 self.onmessage = async function (event) {
-  const { file } = event.data;
+  const { file,showAll} = event.data;
   const zip = new JSZip();
   const zipContents = await zip.loadAsync(file);
 
@@ -14,7 +14,7 @@ self.onmessage = async function (event) {
     if (zipEntry.dir) {
       return; // Skip directories
     }
-    console.log(relativePath,"zipEntry.dir")
+    console.log(relativePath, "zipEntry.dir")
     const pathParts = relativePath.split('/');
     const folderName = pathParts.length > 1 ? pathParts[0] : '';
 
@@ -35,15 +35,22 @@ self.onmessage = async function (event) {
       );
     }
   });
+//=====using if else condition for defect detection as we have to show both folder images instead of a single folder as we have shown in object and classification=====
+const results = await Promise.all(filePromises);
+let imageUrls = [];
+  if (showAll) {   
+    imageUrls = results.map((result) => result.url);
+    self.postMessage({ imageUrls, imageFolder: null });
+  } else {
+    // const results = await Promise.all(filePromises);
+    const mostImagesFolder = Object.keys(folderImageCounts).reduce((a, b) =>
+      folderImageCounts[a] > folderImageCounts[b] ? a : b
+    );
 
-  const results = await Promise.all(filePromises);
-  const mostImagesFolder = Object.keys(folderImageCounts).reduce((a, b) =>
-    folderImageCounts[a] > folderImageCounts[b] ? a : b
-  );
+   imageUrls = results
+      .filter((result) => result.folder === mostImagesFolder)
+      .map((result) => result.url);
 
-  const imageUrls = results
-    .filter((result) => result.folder === mostImagesFolder)
-    .map((result) => result.url);
-
-  self.postMessage({ imageUrls, imageFolder: mostImagesFolder });
+    self.postMessage({ imageUrls, imageFolder: mostImagesFolder });
+  }
 };

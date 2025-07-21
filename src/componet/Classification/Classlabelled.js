@@ -80,7 +80,8 @@ function Classlabelled({ iState, updateIstate,userData,state, onApply,onChange }
         }
     }, [])
     const processZipFileInWorker = (file) => {
-        const worker = new Worker(new URL("../../Zipworker.js", import.meta.url));
+        const worker = new Worker('/Zipworker.js');
+        // const worker = new Worker(new URL("Zipworker.js", import.meta.url));
         setIstate({ ...istate, imageFolder: imageFolder, imageUrls: [], loading: true });
         worker.onmessage = (event) => {
             const { imageUrls, imageFolder } = event.data;

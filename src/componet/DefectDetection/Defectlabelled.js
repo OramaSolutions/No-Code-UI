@@ -78,7 +78,8 @@ function Defectlabelled({ iState, updateIstate, userData, state, onApply, onChan
         }
     }, [])
     const processZipFileInWorker = (file) => {
-        const worker = new Worker(new URL("../../Zipworker.js", import.meta.url));//we are creating the worker
+        const worker = new Worker('/Zipworker.js');
+        // const worker = new Worker(new URL("Zipworker.js", import.meta.url));//we are creating the worker
         setIstate({ ...istate, imageFolder: imageFolder, imageUrls: [], loading: true });//here while creating till then show loading in ui
         worker.onmessage = (event) => { //it's the result providing by worker and setting it up to our state
             const { imageUrls, imageFolder } = event.data;

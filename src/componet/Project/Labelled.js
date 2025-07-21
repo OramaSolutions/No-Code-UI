@@ -82,8 +82,8 @@ function Labelled({ iState, updateIstate, userData, state, onApply,onChange }) {
         }
     }, [])
     const processZipFileInWorker = (file) => {
-        const worker = new Worker(new URL("Zipworker.js", import.meta.url));
-
+        // const worker = new Worker(new URL("Zipworker.js", import.meta.url));
+        const worker = new Worker('/Zipworker.js');
         console.log("worker", worker)
 
         setIstate((prev) => ({ ...prev, imageFolder: imageFolder, imageUrls: [], loading: true }));

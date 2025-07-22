@@ -9,7 +9,7 @@ import DefectDataSplit from './DefectDataSplit';
 import DefectHypertune from './DefectHypertune';
 import DefectInfer from './DefectInfer';
 import axios from 'axios';
-import { Url2, getUrl } from '../../config/config';
+import {  getUrl } from '../../config/config';
 
 const url = getUrl('defect-detection')
 console.log('url', url)

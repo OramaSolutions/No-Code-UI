@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Loader from '../../commonComponent/Loader'
 import Modal from 'react-bootstrap/Modal';
-import { Url2 } from '../../config/config';
+
 import axios from 'axios';
 import { getUrl } from '../../config/config';
 const url = getUrl('classification')

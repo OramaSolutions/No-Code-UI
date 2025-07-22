@@ -9,7 +9,7 @@ import { DefecthyperTune, DefectModal, ReturnDefectHypertune } from '../../redux
 import axios from 'axios';
 
 import Loader from '../../commonComponent/Loader';
-import { Url2, getUrl } from '../../config/config';
+import { getUrl } from '../../config/config';
 
 const url = getUrl('defect-detection')
 

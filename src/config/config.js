@@ -33,12 +33,8 @@ module.exports = {
     // Dynamic service resolver
     getUrl: function (key) {
         const urls = {
-            'defect-detection': isLocalhost
-                ? 'http://localhost:5000/proxy/'
-                : 'https://nocode-defect-detection.oramasolutions.in/',
-            'classification': isLocalhost
-                ? 'http://localhost:5000/proxy/'
-                : 'https://oramasolutions.ngrok.app/',
+            'defect-detection': 'https://nocode-defect-detection.oramasolutions.in/',
+            'classification': isLocalhost ? 'http://192.168.1.187:5000/' : 'https://nocode-classification.oramasolutions.in/',
             'text-extraction': 'https://nocode-text-extraction.oramasolutions.in/',
             'object-detection': 'https://nocode-object-detection.oramasolutions.in/'
         };

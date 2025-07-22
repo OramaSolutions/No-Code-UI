@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { Url, Url2 } from '../../config/config.js';
+import { Url } from '../../config/config.js';
 import { isLoggedIn } from "../../utils";
 
 let path = window.location.href.split("/")?.at(-1)

@@ -3,7 +3,7 @@ import axios from 'axios';
 
 import { isLoggedIn } from "../../utils";
 
-import { Url2, getUrl } from '../../config/config';
+import {getUrl } from '../../config/config';
 
 const url = getUrl('defect-detection')
 

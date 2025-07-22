@@ -3,7 +3,7 @@ import Modal from 'react-bootstrap/Modal';
 import DataTransferModal from './DataTransferModal';
 import { useDispatch, useSelector } from 'react-redux';
 import { DataTransfer } from '../../reduxToolkit/Slices/projectSlices';
-import { Url2 } from '../../config/config';
+
 import DefectTrainModal from '../DefectDetection/DefectTrainModal';
 import DefectVisualize from '../DefectDetection/DefectVisualize';
 import { getUrl } from '../../config/config';

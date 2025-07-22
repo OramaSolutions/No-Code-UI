@@ -8,7 +8,7 @@ import { ResizeFolder, importData } from "../../reduxToolkit/Slices/projectSlice
 import ResizeModal from "../Project/ResizeModal";
 import ImportModal from "../Project/ImportModal";
 import { ClassResizeFolder, importClassData } from "../../reduxToolkit/Slices/classificationSlices";
-import { Url2, getUrl } from '../../config/config';
+import {  getUrl } from '../../config/config';
 
 const url = getUrl('defect-detection')
 

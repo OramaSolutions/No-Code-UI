@@ -14,7 +14,7 @@ import axios from "axios";
 
 import DefectTrainModal from "./DefectTrainModal";
 import DefectVisualize from "./DefectVisualize";
-import { Url2, getUrl } from '../../config/config';
+import { getUrl } from '../../config/config';
 
 const url = getUrl('defect-detection')
 
@@ -31,7 +31,7 @@ function DefectInfer({ userData, state, onApply, onChange }) {
     const dispatch = useDispatch();
     const [selectedFile, setSelectedFile] = useState(null);
     const [istate, updateIstate] = useState(initialstate)
-    const { onOpen, confidence, inferData, loader, openVisualize,opendefectTraining } = istate;
+    const { onOpen, confidence, inferData, loader, openVisualize, opendefectTraining } = istate;
     console.log(istate, "istaee of infer")
 
     useEffect(() => {
@@ -57,7 +57,7 @@ function DefectInfer({ userData, state, onApply, onChange }) {
         const file = acceptedFiles[0];
         if (file && file.type.startsWith('image/')) {
             setSelectedFile(file);
-
+            console.log('>>.', file)
         } else {
             setSelectedFile(null);
             toast.error('Please select a valid image file (jpg, png, etc.)', commomObj);
@@ -83,7 +83,7 @@ function DefectInfer({ userData, state, onApply, onChange }) {
             formData.append("confidence", confidence);
 
             updateIstate({ ...istate, loader: true })
-            const response = await dispatch(Defectinfer({payload:formData, url}))
+            const response = await dispatch(Defectinfer(formData))
             if (response?.payload?.status === 200) {
                 toast.success(response?.payload?.data?.message, commomObj)
                 updateIstate({ ...istate, onOpen: true, inferData: response?.payload?.data, loader: false })
@@ -97,7 +97,7 @@ function DefectInfer({ userData, state, onApply, onChange }) {
 
         }
     }
-    const openAccuracy=()=>{
+    const openAccuracy = () => {
         updateIstate({ ...istate, opendefectTraining: true })
     }
     return (
@@ -143,6 +143,16 @@ function DefectInfer({ userData, state, onApply, onChange }) {
                                 </span>
 
                             </div>
+                            {selectedFile && (
+                                <div className="mt-4">
+                                    <p>Preview:</p>
+                                    <img
+                                        src={URL.createObjectURL(selectedFile)}
+                                        alt="Preview"
+                                        className="max-w-full h-auto rounded shadow"
+                                    />
+                                </div>
+                            )}
                         </div>
                         <div
                             className="form-group"
@@ -208,7 +218,7 @@ function DefectInfer({ userData, state, onApply, onChange }) {
                 setSelectedFile={setSelectedFile}
             />
 
-            {opendefectTraining && <DefectTrainModal            
+            {opendefectTraining && <DefectTrainModal
                 data={istate}
                 setData={updateIstate}
                 onApply={onApply}

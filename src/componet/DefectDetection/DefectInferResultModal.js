@@ -4,7 +4,7 @@ import Modal from 'react-bootstrap/Modal';
 
 import axios from 'axios';
 
-import { Url2, getUrl } from '../../config/config';
+import { getUrl } from '../../config/config';
 
 const url = getUrl('defect-detection')
 

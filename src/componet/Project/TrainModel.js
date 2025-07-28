@@ -23,11 +23,18 @@ function TrainModel({ initialData, setState, onApply, userData, state, task, api
     const [output, setOutput] = useState("")
     const [flag, setFlag] = useState(false)
     console.log(task)
-    const url = getUrl(task)
+    let url = ''
+    if (task === "object_detection") {
+        url = getUrl("object-detection")
+    } else {
+        url = getUrl(task)
+    }
+
     const handleOpen = async () => {
         try {
             updateIstate({ ...istate, opentrainModal: true })
             handleclose();
+            pollUntilImageExists();
             const response = await fetch(`${url}${apiPoint}?username=${userData?.activeUser?.name}&task=${task}&project=${state?.name}&version=${state?.version}`, {
                 method: 'GET',
             });
@@ -37,13 +44,9 @@ function TrainModel({ initialData, setState, onApply, userData, state, task, api
             const reader = response.body.getReader();
             const decoder = new TextDecoder('utf-8');
 
-            if (response.ok) {
-                console.log("fetch called")
-                setTimeout(() => {
-                    setFlag(prev => !prev);
-                    console.log("Timeout: Flag is set to true");
-                }, 5000);
-            }
+
+
+
 
             let result;
             while (!(result = await reader.read()).done) {
@@ -56,6 +59,30 @@ function TrainModel({ initialData, setState, onApply, userData, state, task, api
             console.error('Error fetching stream:', error);
         }
     };
+
+    const pollUntilImageExists = async () => {
+        const pollUrl = `${url}train_batch_img_get?username=${userData?.activeUser?.name}&task=${task}&project=${state?.name}&version=${state?.version}`;
+        console.log('calling ', pollUrl)
+        const poll = async () => {
+            try {
+                const res = await fetch(pollUrl);
+                const data = await res.json();
+                if (data.status === 'ok') {
+                    setFlag(prev => !prev);  // ✅ set flag here
+                    console.log("Polling success: Flag set");
+                    return; // Stop polling
+                } else {
+                    setTimeout(poll, 1000); // Retry after 1s
+                }
+            } catch (err) {
+                console.error("Polling error:", err);
+                setTimeout(poll, 1000); // Retry even on error
+            }
+        };
+
+        poll();
+    };
+
 
     const handleclose = () => {
         console.log('ran handle close in train modal')

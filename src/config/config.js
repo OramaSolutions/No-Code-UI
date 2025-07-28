@@ -26,17 +26,15 @@ module.exports = {
     Url: 'https://nocode-node.oramasolutions.in/api/v1/',
 
     // Url2: Used by classification service
-    Url2: isLocalhost
-        ? 'http://localhost:5000/proxy/'
-        : 'https://oramasolutions.ngrok.app/',
+    // Url2: 'http://192.168.1.177:5000/',
 
     // Dynamic service resolver
     getUrl: function (key) {
         const urls = {
             'defect-detection': 'https://nocode-defect-detection.oramasolutions.in/',
-            'classification': isLocalhost ? 'http://192.168.1.187:5000/' : 'https://nocode-classification.oramasolutions.in/',
+            'classification': 'https://nocode-classification.oramasolutions.in/',//isLocalhost ? 'http://192.168.1.177:5000/' : 'https://nocode-classification.oramasolutions.in/'
             'text-extraction': 'https://nocode-text-extraction.oramasolutions.in/',
-            'object-detection': 'https://nocode-object-detection.oramasolutions.in/'
+            'object-detection': 'http://192.168.1.187:5000/'
         };
 
         if (urls[key]) {

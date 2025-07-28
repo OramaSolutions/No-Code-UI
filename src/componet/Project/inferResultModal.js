@@ -5,21 +5,25 @@ import { Url2 } from '../../config/config';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-function InferResultModal({ onOpen, output, setOutput, state, userData, selectedFile, setSelectedFile }) {
-    const navigate=useNavigate();
+function InferResultModal({ onOpen, output, setOutput, state, userData, selectedFile, setSelectedFile, url }) {
+    const navigate = useNavigate();
     const [imageData, setImageData] = useState("")
     const [loading, setLoading] = useState(null);
-  
+
     useEffect(() => {
         if (onOpen && selectedFile) {
             const fetchImageData = async () => {
                 if (onOpen && selectedFile) {
                     try {
                         setLoading(true);
-                        const timestamp = new Date().getTime();                      
-                        const url = `${Url2}infer_yolov8?username=${userData?.activeUser?.name}&task=object_detection&project=${state?.name}&version=${state?.version}&timestamp=${timestamp}`;                       
-                        const response = await axios.get(url);                                       
-                        setImageData(url);
+                        const timestamp = new Date().getTime();
+                        const inferUrl = `${url}infer_yolov8?username=${userData?.activeUser?.name}&task=object_detection&project=${state?.name}&version=${state?.version}&timestamp=${timestamp}`;
+                        const response = await axios.get(inferUrl, {
+                            responseType: 'blob', // ✅ critical for binary/image data
+                        });
+                        const imageBlob = response.data;
+                        const imageUrl = URL.createObjectURL(imageBlob);
+                        setImageData(imageUrl);
                         setLoading(false);
                     } catch (error) {
                         console.error("Error fetching image data", error);
@@ -33,7 +37,7 @@ function InferResultModal({ onOpen, output, setOutput, state, userData, selected
     }, [onOpen, selectedFile]);
 
     const closeHandler = () => {
-        setOutput((prev) => ({ ...prev, onOpen: !onOpen}))
+        setOutput((prev) => ({ ...prev, onOpen: !onOpen }))
         setSelectedFile(null)
         setImageData("")
         setLoading(null)
@@ -44,7 +48,7 @@ function InferResultModal({ onOpen, output, setOutput, state, userData, selected
                 show={onOpen}
                 className="ModalBox ModalWidth75"
             >
-                <Modal.Body > 
+                <Modal.Body >
                     <div className="Category" >
                         <>
                             <div className="ProjectAlreadyArea" style={{ height: "auto" }}>
@@ -54,18 +58,18 @@ function InferResultModal({ onOpen, output, setOutput, state, userData, selected
                                         <img src={imageData} height={550} />
                                     </figure>
                                     : <Loader
-                                    className="text-align-end"
-                                    item={"440px"} 
-                                    style={{
-                                        textAlign: "justify !important"
-                                    }}
+                                        className="text-align-end"
+                                        item={"440px"}
+                                        style={{
+                                            textAlign: "justify !important"
+                                        }}
                                     />}
                                 <div className="col-lg-5 mx-auto">
                                     <div className="TwoButtons">
                                         <a role="button" className="OutlineBtn" onClick={() => closeHandler()}>
                                             Continue
                                         </a>
-                                        <a role='button' className="FillBtn" onClick={()=>navigate("")}>
+                                        <a role='button' className="FillBtn" onClick={() => navigate("")}>
                                             Remark
                                         </a>
                                     </div>

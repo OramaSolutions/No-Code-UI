@@ -330,7 +330,7 @@ function DataTransferModal({ data, setData, apiresponse, setResponse, flag, setF
                             <div className="col-lg-6">
                                 <div className="ValidationTableNew">
                                     <div className='flex justify-between items-center  my-4'>
-                                        <h6>Validation Matrix</h6>
+                                        <h6>Validation Matrix (Upcoming update.)</h6>
                                         {showButtons && <>
                                             <button className="w-fit bg-blue-500 px-4 py-2 rounded-md text-white" onClick={fetchData} style={{ marginTop: '10px' }}>Fetch Data</button>
                                             {status.loadingMatrix && <div className="text-blue-500 mt-2">Loading validation matrix...</div>}
@@ -393,8 +393,8 @@ function DataTransferModal({ data, setData, apiresponse, setResponse, flag, setF
 
 
                                             )) : <tr>
-                                                <td colspan="4"><Loader item="200px" style={{ margin: "0px auto!important", display: "flex", justifyContent: "center" }}
-                                                /></td></tr>}
+                                                <td colspan="12" className='text-center'>
+                                                    Upcoming Update</td></tr>}
                                         </tbody>
                                     </table>
                                 </div>

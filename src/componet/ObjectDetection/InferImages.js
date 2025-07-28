@@ -1,63 +1,33 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { commomObj } from '../../utils';
 import { toast } from 'react-toastify';
 import { inferImages } from "../../reduxToolkit/Slices/projectSlices";
 import { useDispatch, useSelector } from "react-redux";
 import Slider from "rc-slider";
-
-import { Defectinfer } from "../../reduxToolkit/Slices/defectSlices";
-import DefectInferResultModal from "./DefectInferResultModal";
-import axios from "axios";
-
-import DefectTrainModal from "./DefectTrainModal";
-import DefectVisualize from "./DefectVisualize";
-import { getUrl } from '../../config/config';
-
-const url = getUrl('defect-detection')
+import InferResultModal from "../Project/inferResultModal";
 
 const initialstate = {
+    conf: 0.5,
     onOpen: false,
-    confidence: 0,
-    inferData: "",
-    loader: false,
-    opendefectTraining: false,
-    openVisualize: false,
 }
 
-function DefectInfer({ userData, state, onApply, onChange }) {
-    const dispatch = useDispatch();
+function InferImages({ userData, state, url }) {
     const [selectedFile, setSelectedFile] = useState(null);
     const [istate, updateIstate] = useState(initialstate)
-    const { onOpen, confidence, inferData, loader, openVisualize, opendefectTraining } = istate;
-    console.log(istate, "istaee of infer")
+    const [imagePreview, setImagePreview] = useState(null);
+    const { conf, onOpen } = istate;
+    const dispatch = useDispatch();
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const res = await axios.get(`${url}get_confidence?username=${userData?.activeUser?.name}&task=defect-detection&project_name=${state?.name}&version=${state?.version}`)
-                console.log(res, "response of infer confidence")
-                if (res?.status == 200) {
-                    updateIstate({ ...istate, confidence: (res?.data?.confidence).toFixed(2) || 0 })
-                }
-            }
-            catch (err) {
-                console.log(err, "err")
-            }
-        }
-        if (!onOpen) {
-            fetchData();
-        }
-
-    }, [onOpen])
 
     const onDrop = (acceptedFiles) => {
         const file = acceptedFiles[0];
         if (file && file.type.startsWith('image/')) {
             setSelectedFile(file);
-            console.log('>>.', file)
+            setImagePreview(URL.createObjectURL(file)); // ✅ show preview
         } else {
             setSelectedFile(null);
+            setImagePreview(null);
             toast.error('Please select a valid image file (jpg, png, etc.)', commomObj);
         }
     };
@@ -66,6 +36,7 @@ function DefectInfer({ userData, state, onApply, onChange }) {
         accept: 'image/*',
         maxFiles: 1
     });
+
     const saveHandler = async () => {
         if (!selectedFile) {
             toast.error("Please Select a Image to infer", commomObj)
@@ -75,47 +46,44 @@ function DefectInfer({ userData, state, onApply, onChange }) {
             const formData = new FormData();
             formData.append("username", userData?.activeUser?.name);
             formData.append("version", state?.version);
-            formData.append("project_name", state?.name);
-            formData.append("task", "defect-detection");
-            formData.append("image", selectedFile);
-            formData.append("confidence", confidence);
+            formData.append("project", state?.name);
+            formData.append("task", "object_detection");
+            formData.append("file", selectedFile);
+            formData.append("conf", conf);
 
-            updateIstate({ ...istate, loader: true })
-            const response = await dispatch(Defectinfer(formData))
-            if (response?.payload?.status === 200) {
+            const response = await dispatch(inferImages({ payload: formData, url }))
+            console.log(response, "response of import image")
+            if (response?.payload?.status === 201) {
                 toast.success(response?.payload?.data?.message, commomObj)
-                updateIstate({ ...istate, onOpen: true, inferData: response?.payload?.data, loader: false })
+                updateIstate({ ...istate, onOpen: true })
             } else {
                 toast.error(response?.payload?.data?.message, commomObj)
-                updateIstate({ ...istate, loader: false })
             }
         } catch (error) {
             toast.error("Oops,something went wrong", commomObj)
-            updateIstate({ ...istate, loader: false })
+            console.error("Error uploading file:", error);
 
         }
     }
-    const openAccuracy = () => {
-        updateIstate({ ...istate, opendefectTraining: true })
-    }
+    useEffect(() => {
+    return () => {
+        if (imagePreview) {
+            URL.revokeObjectURL(imagePreview);
+        }
+    };
+}, [imagePreview]);
     return (
-        <div>
+        <>
             <div className="Small-Wrapper">
                 <h6 className="Remarks">Infer Images</h6>
                 <div className="CommonForm">
-                    <div className="row">
-                        <div className="TwoButtons" style={{ marginLeft: "764px" }}>
-                            <a
-                                role="buton"
-                                className="Button"
-                                style={{ paddingRight: "18px" }}
-                                onClick={openAccuracy}
-                            >
-                                View Accuracy Matrix
-                            </a>
-                        </div>
-                    </div>
                     <form>
+                        {/* <div className="form-group">
+                            <label>Source of Images</label>
+                            <select className="form-control">
+                                <option>Select Source of Images</option>
+                            </select>
+                        </div> */}
                         <div className="form-group">
                             <label>Image</label>
                             <input
@@ -141,23 +109,36 @@ function DefectInfer({ userData, state, onApply, onChange }) {
                                 </span>
 
                             </div>
-                            {selectedFile && (
-                                <div className="mt-4">
-                                    <p>Preview:</p>
+                        </div>
+                        <div className="form-group text-center">
+                            <label>OR</label>
+                        </div>
+                        <div className="form-group">
+                            <label>Source of Images</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Basler Camera"
+                            />
+                        </div>
+                        {imagePreview && (
+                            <div className="form-group text-center mt-3">
+                                <label>Preview:</label>
+                                <div style={{ maxWidth: "100%", maxHeight: "300px" }}>
                                     <img
-                                        src={URL.createObjectURL(selectedFile)}
-                                        alt="Preview"
-                                        className="max-w-full h-auto rounded shadow"
+                                        src={imagePreview}
+                                        alt="Selected preview"
+                                        style={{ maxWidth: "100%", maxHeight: "300px", borderRadius: "8px" }}
                                     />
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
                         <div
                             className="form-group"
                             style={{ display: "flex", margin: "35px 0 75px 0" }}
                         >
                             <label>
-                                Threshold Value-{" "}
+                                Confidence Level{" "}
                                 <span
                                     className="EsclamSpan"
                                     data-toggle="tooltip"
@@ -175,16 +156,16 @@ function DefectInfer({ userData, state, onApply, onChange }) {
                                     <Slider
                                         min={0}
                                         max={1}
-                                        step={0.01}
-                                        value={confidence}
-                                        onChange={(value) => updateIstate({ ...istate, confidence: value })}
+                                        step={0.1}
+                                        value={conf}
+                                        onChange={(value) => updateIstate({ ...istate, conf: value })}
                                         className="custom-slider"
                                     />
                                     <div
                                         className="slider-value"
-                                        style={{ left: `${(confidence / 1) * 100}%` }}
+                                        style={{ left: `${(conf / 1) * 100}%` }} // Adjust position based on slider value
                                     >
-                                        {confidence}
+                                        {conf?.toFixed(1)}
                                     </div>
                                 </div>
                             </div>
@@ -192,11 +173,13 @@ function DefectInfer({ userData, state, onApply, onChange }) {
                         <div className="row">
                             <div className="col-lg-7 mx-auto">
                                 <div className="TwoButtons">
+                                    <a className="OutlineBtn">
+                                        Cancel
+                                    </a>
                                     <a
                                         role="buton"
                                         className="FillBtn"
                                         onClick={saveHandler}
-                                        style={{ backgroundColor: loader ? "grey" : "#028DEC", pointerEvents: loader ? 'none' : '' }}
                                     >
                                         Start Inference
                                     </a>
@@ -206,36 +189,18 @@ function DefectInfer({ userData, state, onApply, onChange }) {
                     </form>
                 </div>
             </div>
-            <DefectInferResultModal
+            <InferResultModal
+                onOpen={onOpen}
                 output={istate}
                 setOutput={updateIstate}
                 userData={userData}
                 state={state}
-                onApply={onApply}
-                onChange={onChange}
+                selectedFile={selectedFile}
                 setSelectedFile={setSelectedFile}
+                url={url}
             />
-
-            {opendefectTraining && <DefectTrainModal
-                data={istate}
-                setData={updateIstate}
-                onApply={onApply}
-                userData={userData}
-                state={state}
-                task="defect-detection"
-                type="infer"
-            />}
-            {openVisualize && <DefectVisualize
-                data={istate}
-                setData={updateIstate}
-                onApply={onApply}
-                userData={userData}
-                state={state}
-                task="defect-detection"
-                type="infer"
-            />}
-        </div>
+        </>
     )
 }
-export default DefectInfer
 
+export default InferImages

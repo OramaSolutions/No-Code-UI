@@ -142,7 +142,7 @@ const Application = ({ state, url, userData, username, task, project, version })
     setError(null);
 
     try {
-      const response = await axios.post(`${url}/build-image-pri`, {
+      const response = await axios.post(`${url}build-image-pri`, {
         username,
         task,
         project,

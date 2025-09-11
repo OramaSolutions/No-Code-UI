@@ -37,7 +37,7 @@ function Classlabelled({ iState, updateIstate, userData, state, onApply, onChang
         const fetchAndSaveStreamingZip = async () => {
             try {
                 setLoadingData(true)
-                const response = await fetch(`${url}return_import_dataset_cls?username=${userData?.activeUser?.name}&task=classification&project=${state?.name}&version=${state?.version}`, {
+                const response = await fetch(`${url}return_import_dataset_cls?username=${userData?.activeUser?.userName}&task=classification&project=${state?.name}&version=${state?.version}`, {
                     method: 'GET',
                 });
                 console.log(response, "responseeee")
@@ -113,7 +113,7 @@ function Classlabelled({ iState, updateIstate, userData, state, onApply, onChang
 
         const formData = new FormData();
         formData.append("file", selectedFile);
-        formData.append("username", userData?.activeUser?.name);
+        formData.append("username", userData?.activeUser?.userName);
         formData.append("version", state?.version);
         formData.append("project", state?.name);
         formData.append("width", width);
@@ -164,7 +164,7 @@ function Classlabelled({ iState, updateIstate, userData, state, onApply, onChang
         }
         const formData = new FormData();
         formData.append("file", selectedFile);
-        formData.append("username", userData?.activeUser?.name);
+        formData.append("username", userData?.activeUser?.userName);
         formData.append("version", state?.version);
         formData.append("project", state?.name);
         formData.append("task", "classification");

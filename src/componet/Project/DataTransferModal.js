@@ -10,14 +10,16 @@ import { commomObj } from '../../utils';
 import TrainingCompleted from './TrainingCompleted';
 import Papa from "papaparse";
 import { ClassStopDataTransfer } from '../../reduxToolkit/Slices/classificationSlices';
+
 const url = getUrl('classification')
+
 const initialstate = {
     openImage: false,
     trainingImage: "No image",
 }
 
 function DataTransferModal({ data, setData, apiresponse, setResponse, flag, setFlag, onApply, state, userData, task }) {
-    const outputRef = useRef(null);
+    const outputRef = useRef(null); 
     const rowsRef = useRef(null);
     const [dots, setDots] = useState('');
     const dispatch = useDispatch()
@@ -63,7 +65,7 @@ function DataTransferModal({ data, setData, apiresponse, setResponse, flag, setF
         const fetchdata = async () => {
             try {
                 let apiendpoint = task === "classification" ? "val_matrix_cls" : "val_matrix";
-                const response = await fetch(`${url}${apiendpoint}?username=${userData?.activeUser?.name}&task=${task}&project=${state?.name}&version=${state?.version}`);
+                const response = await fetch(`${url}${apiendpoint}?username=${userData?.activeUser?.userName}&task=${task}&project=${state?.name}&version=${state?.version}`);
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -127,7 +129,7 @@ function DataTransferModal({ data, setData, apiresponse, setResponse, flag, setF
     // const fetchdata = async () => {
     //     try {
     //         let apiendpoint = task === "classification" ? "val_matrix_cls" : "val_matrix";
-    //         const response = await fetch(`${Url2}${apiendpoint}?username=${userData?.activeUser?.name}&task=${task}&project=${state?.name}&version=${state?.version}`);
+    //         const response = await fetch(`${Url2}${apiendpoint}?username=${userData?.activeUser?.userName}&task=${task}&project=${state?.name}&version=${state?.version}`);
 
     //         if (!response.ok) {
     //             throw new Error(`HTTP error! status: ${response.status}`);
@@ -185,7 +187,7 @@ function DataTransferModal({ data, setData, apiresponse, setResponse, flag, setF
         setStatus(prev => ({ ...prev, loadingMatrix: true, errorMatrix: '' }));
         try {
             let apiendpoint = task === "classification" ? "val_matrix_cls" : "val_matrix";
-            const response = await fetch(`${url}${apiendpoint}?username=${userData?.activeUser?.name}&task=${task}&project=${state?.name}&version=${state?.version}`);
+            const response = await fetch(`${url}${apiendpoint}?username=${userData?.activeUser?.userName}&task=${task}&project=${state?.name}&version=${state?.version}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -216,7 +218,7 @@ function DataTransferModal({ data, setData, apiresponse, setResponse, flag, setF
         setStatus(prev => ({ ...prev, loadingImage: true, errorImage: '' }));
         try {
             const payload = {
-                username: userData?.activeUser?.name,
+                username: userData?.activeUser?.userName,
                 version: state?.version,
                 project: state?.name,
                 task: task,
@@ -244,7 +246,7 @@ function DataTransferModal({ data, setData, apiresponse, setResponse, flag, setF
     const stopHandler = async () => {
         try {
             const formData = new FormData();
-            formData.append("username", userData?.activeUser?.name);
+            formData.append("username", userData?.activeUser?.userName);
             formData.append("version", state?.version);
             formData.append("project", state?.name);
             formData.append("task", task);
@@ -329,8 +331,8 @@ function DataTransferModal({ data, setData, apiresponse, setResponse, flag, setF
                             </div>
                             <div className="col-lg-6">
                                 <div className="ValidationTableNew">
-                                    <div className='flex justify-between items-center  my-4'>
-                                        <h6>Validation Matrix (Upcoming update.)</h6>
+                                    <div className='flex justify-between items-center my-4'>
+                                        <h6>Validation Matrix</h6>
                                         {showButtons && <>
                                             <button className="w-fit bg-blue-500 px-4 py-2 rounded-md text-white" onClick={fetchData} style={{ marginTop: '10px' }}>Fetch Data</button>
                                             {status.loadingMatrix && <div className="text-blue-500 mt-2">Loading validation matrix...</div>}
@@ -393,8 +395,10 @@ function DataTransferModal({ data, setData, apiresponse, setResponse, flag, setF
 
 
                                             )) : <tr>
-                                                <td colspan="12" className='text-center'>
-                                                    Upcoming Update</td></tr>}
+                                                {/* <td colspan="12" className='text-center'>
+                                                    Upcoming Update</td> */}
+                                                    <Loader />
+                                                    </tr>}
                                         </tbody>
                                     </table>
                                 </div>

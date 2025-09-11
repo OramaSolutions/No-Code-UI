@@ -36,7 +36,7 @@ function HyperTune({onApply,state,userData,onChange }) {
     //==========================================pre-trained model============================================
     useEffect(() => {
         dispatch(HypetTuneModal({
-            username: userData?.activeUser?.name,
+            username: userData?.activeUser?.userName,
             version: state?.version,
             project:state?.name,
             task: "object_detection",
@@ -44,7 +44,7 @@ function HyperTune({onApply,state,userData,onChange }) {
         const fetchData = async () => {
             try {
                 const res = await dispatch(ReturnHypertune({
-                    username: userData?.activeUser?.name,
+                    username: userData?.activeUser?.userName,
                     version: state?.version,
                     project: state?.name,
                     task: "object_detection",
@@ -92,7 +92,7 @@ function HyperTune({onApply,state,userData,onChange }) {
             return;
         }
         const formData = new FormData();
-        formData.append("username",userData?.activeUser?.name);
+        formData.append("username",userData?.activeUser?.userName);
         formData.append("version",state?.version);
         formData.append("project", state?.name);
         formData.append("task", "object_detection");

@@ -33,7 +33,7 @@ function Header() {
     return (
         <div>
             <div className="Header">
-                <div className="NewHeaderLeft">
+                <div className="NewHeaderLeft py-4">
                     <h2>Hi, {profileimage?.name ? profileimage?.name : sellerLogin?.activeUser?.name}</h2>
                     <p>Let's finish your task today!</p>
                 </div>

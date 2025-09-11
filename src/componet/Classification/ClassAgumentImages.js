@@ -19,7 +19,7 @@ function ClassAgumentImages({iState,onApply ,userData,state}) {
         const fetchData = async () => {
             try{    
                 const payload = {
-                username:userData?.activeUser?.name,
+                username:userData?.activeUser?.userName,
                 version:state?.version,
                 project:state?.name,
                 task: "classification",
@@ -53,7 +53,7 @@ const generatedImages=async()=>{
     try{ 
         setLoader(true)  
         const payload = {
-            username:userData?.activeUser?.name,
+            username:userData?.activeUser?.userName,
             version:state?.version,
             project:state?.name,
             task: "classification",

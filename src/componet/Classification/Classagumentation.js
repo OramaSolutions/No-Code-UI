@@ -56,7 +56,7 @@ function Classagumentation({ initial, setIstate, state, userData, onApply, onCha
         const fetchData = async () => {
             try {
                 const payload = {
-                    username: userData?.activeUser?.name,
+                    username: userData?.activeUser?.userName,
                     version: state?.version,
                     project: state?.name,
                     task: "classification",
@@ -178,7 +178,7 @@ function Classagumentation({ initial, setIstate, state, userData, onApply, onCha
 
                 const jsonString = JSON.stringify(augmentations);
                 const formData = new FormData();
-                formData.append("username", userData?.activeUser?.name);
+                formData.append("username", userData?.activeUser?.userName);
                 formData.append("version", state?.version);
                 formData.append("project", state?.name);
                 formData.append("task", "classification");

@@ -33,7 +33,7 @@ function Defectlabelled({ iState, updateIstate, userData, state, onApply, onChan
     useEffect(() => {
         const fetchAndSaveStreamingZip = async () => {
             try {
-                const response = await fetch(`${url}get_import_dataset?username=${userData?.activeUser?.name}&task=defect-detection&project_name=${state?.name}&version=${state?.version}`, {
+                const response = await fetch(`${url}get_import_dataset?username=${userData?.activeUser?.userName}&task=defect-detection&project_name=${state?.name}&version=${state?.version}`, {
                     method: 'GET',
                 });
                 console.log(response, "responseeee")
@@ -108,7 +108,7 @@ function Defectlabelled({ iState, updateIstate, userData, state, onApply, onChan
 
         const formData = new FormData();
         formData.append("file", selectedFile);
-        formData.append("username", userData?.activeUser?.name);
+        formData.append("username", userData?.activeUser?.userName);
         formData.append("version", state?.version);
         formData.append("project_name", state?.name);
         formData.append("task", "defect-detection");

@@ -41,7 +41,7 @@ function DefectHypertune({ onApply, state, userData, onChange ,trainingStatus}) 
     //========================================pre-trained model============================================
     useEffect(() => {
         dispatch(DefectModal({
-            username: userData?.activeUser?.name,
+            username: userData?.activeUser?.userName,
             version: state?.version,
             project: state?.name,
             task: "defect-detection",
@@ -52,7 +52,7 @@ function DefectHypertune({ onApply, state, userData, onChange ,trainingStatus}) 
                     updateIstate({ ...istate, loader: false, openModal: true })
                 }
                 const res = await dispatch(ReturnDefectHypertune({
-                    username: userData?.activeUser?.name,
+                    username: userData?.activeUser?.userName,
                     version: state?.version,
                     project_name: state?.name,
                     task: "defect-detection",
@@ -100,7 +100,7 @@ function DefectHypertune({ onApply, state, userData, onChange ,trainingStatus}) 
     //=============================================save handler========================================
     const saveHandler = async () => {
         if (isDirty || hasChangedSteps?.HyperTune == false) {
-            const res = await axios.get(`${url}get_train_infer?username=${userData?.activeUser?.name}&task=defect-detection&project_name=${state?.name}&version=${state?.version}`)
+            const res = await axios.get(`${url}get_train_infer?username=${userData?.activeUser?.userName}&task=defect-detection&project_name=${state?.name}&version=${state?.version}`)
             console.log(res, "response of training")
             if (res?.status === 200 && res?.data?.status != "training_completed") {
                 updateIstate({ ...istate, loader: false, openModal: true })
@@ -111,7 +111,7 @@ function DefectHypertune({ onApply, state, userData, onChange ,trainingStatus}) 
                 return;
             }
         }
-        const data = { username: userData?.activeUser?.name, version: state?.version, project_name: state?.name, task: "defect-detection", model, image_size: Number(image_size) == 0 ? 256 : Number(image_size), model_size, test_split_mode, test_split: Number(test_split) == 0 ? 0.2 : Number(test_split), apply, tile_size: Number(tile_size) == 0 ? null : Number(tile_size), stride: Number(stride) == 0 ? null : Number(stride), use_random_tiling, random_tile_count: Number(random_tile_count) == 0 ? 16 : Number(random_tile_count), center_crop: Number(center_crop) == 0 ? 224 : Number(center_crop) }
+        const data = { username: userData?.activeUser?.userName, version: state?.version, project_name: state?.name, task: "defect-detection", model, image_size: Number(image_size) == 0 ? 256 : Number(image_size), model_size, test_split_mode, test_split: Number(test_split) == 0 ? 0.2 : Number(test_split), apply, tile_size: Number(tile_size) == 0 ? null : Number(tile_size), stride: Number(stride) == 0 ? null : Number(stride), use_random_tiling, random_tile_count: Number(random_tile_count) == 0 ? 16 : Number(random_tile_count), center_crop: Number(center_crop) == 0 ? 224 : Number(center_crop) }
         try {
             updateIstate({ ...istate, loader: true })
             const response = await dispatch(DefecthyperTune(data))

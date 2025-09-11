@@ -18,7 +18,7 @@ function AugumentImages({ iState, onApply, userData, state, onChange, url }) {
         const fetchData = async () => {
             try {
                 const payload = {
-                    username: userData?.activeUser?.name,
+                    username: userData?.activeUser?.userName,
                     version: state?.version,
                     project: state?.name,
                     task: "object_detection",
@@ -51,7 +51,7 @@ function AugumentImages({ iState, onApply, userData, state, onChange, url }) {
     const generatedImages = async () => {
         try {
             const payload = {
-                username: userData?.activeUser?.name,
+                username: userData?.activeUser?.userName,
                 version: state?.version,
                 project: state?.name,
                 task: "object_detection",

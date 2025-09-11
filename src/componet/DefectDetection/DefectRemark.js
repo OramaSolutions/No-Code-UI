@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { commomObj } from '../../utils';
-import { remarkData } from '../../reduxToolkit/Slices/projectSlices';
+import { remarkData , getRemarkData} from '../../reduxToolkit/Slices/projectSlices';
 import { useDispatch } from "react-redux";
 import { getUrl } from '../../config/config';
 const initialState = {
@@ -11,23 +11,48 @@ const initialState = {
     numOfTries: "",
     loading: false,
 }
-const url = getUrl('classification')
-//  iState={iState}
-//                         updateIstate={updateIstate}
-//                         state={state}
-//                         userData={userData}
-//                         onApply={() => handleApply('remark')}
-//                         onChange={() => handleChange("remark")}
+const url = getUrl('defect-detection')
 
-
-function ClassRemark({ username, task, project, version, onApply, ...props }) {
+                      
+const DefectRemark = ({iState,username, task,project, version,onApply ,onChange}) => {
     const [istate, updateIstate] = useState(initialState);
     const { observation, scopeOfImprovement, numOfTries, loading } = istate;
     const [files, setFiles] = useState([]); // general files
     const [hardwareFile, setHardwareFile] = useState(null); // single .pfs file
     const [showNext, setShowNext] = useState(false); // show Next button after submit
+    const [existingRemark, setExistingRemark] = useState(null);
+    const [uploadedFiles, setUploadedFiles] = useState([]);
+    const [isEditMode, setIsEditMode] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        async function fetchRemark() {
+            try {
+                const response = await dispatch(getRemarkData({ url, username, task, project, version }));
+                if (response?.payload?.code === 200 && (response?.payload?.remarks?.length > 0 || response?.payload?.uploaded_files?.length > 0)) {
+                    setExistingRemark(response.payload.remarks.join('\n'));
+                    setUploadedFiles(response.payload.uploaded_files);
+                    setIsEditMode(true);
+                    // Optionally parse the remark fields if you want to prefill
+                    const obsMatch = response.payload.remarks.find(r => r.startsWith('Observation:'));
+                    const scopeMatch = response.payload.remarks.find(r => r.startsWith('Scope of Improvement:'));
+                    const triesMatch = response.payload.remarks.find(r => r.startsWith('Number of Tries:'));
+                    updateIstate(prev => ({
+                        ...prev,
+                        observation: obsMatch ? obsMatch.replace('Observation:', '').trim() : '',
+                        scopeOfImprovement: scopeMatch ? scopeMatch.replace('Scope of Improvement:', '').trim() : '',
+                        numOfTries: triesMatch ? triesMatch.replace('Number of Tries:', '').trim() : '',
+                    }));
+                } else {
+                    setIsEditMode(false);
+                }
+            } catch (err) {
+                setIsEditMode(false);
+            }
+        }
+        fetchRemark();
+    }, [username, task, project, version, url, dispatch]);
 
     const inputHandler = (e) => {
         const { name, value } = e.target;
@@ -65,7 +90,7 @@ function ClassRemark({ username, task, project, version, onApply, ...props }) {
                 updateIstate((prev) => ({ ...prev, loading: false }));
                 toast.success(response?.payload?.message, commomObj);
                 setShowNext(true); // Show Next button
-                // Do not call onApply here, wait for Next button
+                setIsEditMode(true);
             } else {
                 toast.error(response?.payload?.message || response?.payload?.error, commomObj);
                 updateIstate((prev) => ({ ...prev, loading: false }));
@@ -80,11 +105,27 @@ function ClassRemark({ username, task, project, version, onApply, ...props }) {
     return (
         <div>
             <div className="Small-Wrapper">
-                <a className="AddRemarksBtn">
-                    Admin Remarks
-                </a>
+                <a className="AddRemarksBtn">Admin Remarks</a>
                 <h6 className="Remarks">Remarks</h6>
                 <div className="CommonForm">
+                    {existingRemark && isEditMode && !showNext ? (
+                        <div style={{marginBottom: '1rem'}}>
+                            <div className="form-group">
+                                <label>Existing Remarks:</label>
+                                <pre style={{background: '#f8f9fa', padding: '1em', borderRadius: '5px'}}>{existingRemark}</pre>
+                            </div>
+                            {uploadedFiles.length > 0 && (
+                                <div className="form-group">
+                                    <label>Uploaded Files:</label>
+                                    <ul>
+                                        {uploadedFiles.map((file, idx) => (
+                                            <li key={idx}>{file}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                    ) : null}
                     {!showNext ? (
                         <form onSubmit={saveHandler} encType="multipart/form-data">
                             <div className="form-group">
@@ -158,8 +199,20 @@ function ClassRemark({ username, task, project, version, onApply, ...props }) {
                                     onChange={fileHandler}
                                 />
                             </div>
-                            <div className="ButtonCenter">
-                                <button className="Button" type="submit" disabled={loading}>Submit</button>
+                            <div className="ButtonCenter" style={{display: 'flex', gap: '1rem'}}>
+                                <button className="Button" type="submit" disabled={loading}>{isEditMode ? 'Update' : 'Submit'}</button>
+                                {isEditMode && (
+                                    <button
+                                        className="Button"
+                                        type="button"
+                                        onClick={() => {
+                                            if (typeof onChange === 'function') onChange();
+                                            if (typeof onApply === 'function') onApply();
+                                        }}
+                                    >
+                                        Next
+                                    </button>
+                                )}
                             </div>
                         </form>
                     ) : (
@@ -168,7 +221,7 @@ function ClassRemark({ username, task, project, version, onApply, ...props }) {
                                 className="Button"
                                 type="button"
                                 onClick={() => {
-                                    if (typeof props.onChange === 'function') props.onChange();
+                                    if (typeof onChange === 'function') onChange();
                                     if (typeof onApply === 'function') onApply();
                                 }}
                             >
@@ -182,4 +235,4 @@ function ClassRemark({ username, task, project, version, onApply, ...props }) {
     );
 }
 
-export default ClassRemark;
+export default DefectRemark;

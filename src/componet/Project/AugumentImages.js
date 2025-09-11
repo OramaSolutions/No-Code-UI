@@ -18,7 +18,7 @@ function AugumentImages({ iState, onApply, userData, state, onChange }) {
         const fetchData = async () => {
             try {
                 const res = await dispatch(AgumentedImage({
-                    username: userData?.activeUser?.name,
+                    username: userData?.activeUser?.userName,
                     version: state?.version,
                     project: state?.name,
                     task: "object_detection",
@@ -51,7 +51,7 @@ function AugumentImages({ iState, onApply, userData, state, onChange }) {
         try {
             setLoader(true)
             const res = await dispatch(AgumentedGeneratedImage({
-                username: userData?.activeUser?.name,
+                username: userData?.activeUser?.userName,
                 version: state?.version,
                 project: state?.name,
                 task: "object_detection",

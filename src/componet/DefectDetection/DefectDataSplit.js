@@ -24,7 +24,7 @@ function DefectDataSplit({ onApply, userData, state }) {
     useEffect(() => {
         const getData = async () => {
             const res = await dispatch(ReturnClassDataSplit({
-                username: userData?.activeUser?.name,
+                username: userData?.activeUser?.userName,
                 version: state?.version,
                 project: state?.name,
                 task: "classification",
@@ -46,7 +46,7 @@ function DefectDataSplit({ onApply, userData, state }) {
     useEffect(() => {
         if (flag) {
             dispatch(ClassDataSplitImages({
-                username: userData?.activeUser?.name,
+                username: userData?.activeUser?.userName,
                 version: state?.version,
                 project: state?.name,
                 task: "detection",

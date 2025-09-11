@@ -25,7 +25,7 @@ function DataSplit({ onApply, userData, state, onChange }) {
     useEffect(() => {
         const getData = async () => {
             const res = await dispatch(ReturnDataSplit({
-                username: userData?.activeUser?.name,
+                username: userData?.activeUser?.userName,
                 version: state?.version,
                 project: state?.name,
                 task: "object_detection",
@@ -46,7 +46,7 @@ function DataSplit({ onApply, userData, state, onChange }) {
     useEffect(() => {
         if (flag) {
             dispatch(DataSplitImages({
-                username: userData?.activeUser?.name,
+                username: userData?.activeUser?.userName,
                 version: state?.version,
                 project: state?.name,
                 task: "object_detection",

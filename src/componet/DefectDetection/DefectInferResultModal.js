@@ -14,6 +14,11 @@ function DefectInferResultModal({ output, setOutput, state, userData, onApply, o
         setOutput((prev) => ({ ...prev, onOpen: !onOpen, confidence: "" }))
         setSelectedFile(null)
     }
+    const remarkHandler = () => {
+        console.log('remarkHandler called');
+        onChange()
+        onApply()
+    }
 
     return (
         <>
@@ -36,12 +41,12 @@ function DefectInferResultModal({ output, setOutput, state, userData, onApply, o
                                 </>
                                 : "No Image Found"}
                             <div className="col-lg-5 mx-auto">
-                                <div className="TwoButtons">
-                                    <a role="button" className="OutlineBtn" onClick={() => closeHandler()}>
-                                        Continue
+                                <div className="flex gap-2 flex-row justify-between max-w-64">
+                                    <a role="button" className="    " onClick={() => closeHandler()}>
+                                        Infer More Images
                                     </a>
-                                    <a role='button' className="FillBtn" onClick={() => onApply()}>
-                                        Remark
+                                    <a role="button" className="" onClick={remarkHandler}>
+                                        Continue & Add Remark
                                     </a>
                                 </div>
                             </div>

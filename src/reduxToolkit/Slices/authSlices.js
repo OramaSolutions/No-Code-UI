@@ -11,8 +11,9 @@ const initialState = {
 
 export const userLogin = createAsyncThunk('auth/userLogin', async (payload, { rejectWithValue }) => {
   try {
-  
-    const response = await axios.post(`${Url}user/userLogin`, payload);
+
+    const response = await axios.post(`${Url}user/userLogin`, payload, { withCredentials: true });
+
     if (response.status === 200) {
       return response.data;
     } else {
@@ -58,10 +59,10 @@ export const SetPassword = createAsyncThunk('auth/setPassword', async (payload, 
 //============================================change password=================================================
 export const changePassword = createAsyncThunk('auth/changePassword', async (payload, { rejectWithValue }) => {
   try {
-    const token = isLoggedIn("userLogin");  
+    const token = isLoggedIn("userLogin");
     const response = await axios.put(`${Url}user/changePassword`, payload, {
       headers: { Authorization: `${token}` },
-    });    if (response.status === 200) {
+    }); if (response.status === 200) {
       return response.data;
     } else {
       return rejectWithValue(response.data);
@@ -74,7 +75,7 @@ export const changePassword = createAsyncThunk('auth/changePassword', async (pay
 //===========================================update profile===================================================
 export const updateProfile = createAsyncThunk('auth/updateprofile', async (payload, { rejectWithValue }) => {
   try {
-    const token = isLoggedIn("userLogin");     
+    const token = isLoggedIn("userLogin");
     const response = await axios.post(`${Url}user/editProfile`, payload, {
       headers: { Authorization: `${token}` },
     });
@@ -91,7 +92,7 @@ export const updateProfile = createAsyncThunk('auth/updateprofile', async (paylo
 //================================================view profile api==========================
 export const viewProfile = createAsyncThunk('auth/viewprofile', async (undefined, { rejectWithValue }) => {
   try {
-    const token = isLoggedIn("userLogin");     
+    const token = isLoggedIn("userLogin");
     const response = await axios.get(`${Url}user/viewProfile`, {
       headers: { Authorization: `${token}` },
     });

@@ -9,74 +9,131 @@ import DefectDataSplit from './DefectDataSplit';
 import DefectHypertune from './DefectHypertune';
 import DefectInfer from './DefectInfer';
 import axios from 'axios';
-import {  getUrl } from '../../config/config';
+import { getUrl } from '../../config/config';
+import DefectRemark from './DefectRemark';
+import Application from './Application'
+import { useStepPersistence } from './useStepPersistence';
 
 const url = getUrl('defect-detection')
 console.log('url', url)
+
 function DefectTraining() {
     const dispatch = useDispatch();
-    const [iState, updateIstate] = useState("labelled")
+    const [iState, updateIstate] = useState("labelled") // Keep existing state
     const userData = JSON.parse(window.localStorage.getItem("userLogin"))
     const { hasChangedSteps } = useSelector((state) => state.steps);
+
+    // Keep existing completedSteps for backward compatibility
     const [completedSteps, setCompletedSteps] = useState({
         labelled: false,
         HyperTune: false,
         infer: false,
         remark: false,
-        trainingStatus:false,
+        trainingStatus: false,
     });
+
     const { state } = useLocation();
+    console.log('state', state )
+    const stepsOrder = ['labelled', 'HyperTune', 'infer', 'remark', 'application'];
 
-    const stepsOrder = ['labelled', 'HyperTune', 'infer', 'remark'];
+    // Integrate useStepPersistence
+    const { stepStatus, currentStep, isLoading, fetchProjectStatus, updateStepStatus, isStepAccessible } =
+        useStepPersistence(userData, state);
 
+    // Initialize and sync with backend status
     useEffect(() => {
-        const fetchStatus = async () => {
-            try {
-                const res = await axios.get(`${url}status?username=${userData?.activeUser?.name}&task=defect-detection&project_name=${state?.name}&version=${state?.version}`)
-                console.log(res, "response for opening the step in defect","HELLO")
-                if (res?.status === 200) {
-                    if (res?.data?.status == "training_completed_successfully") {
-                        setCompletedSteps({ ...completedSteps, labelled: true, HyperTune: true, remark: true })
-                        handleApply("HyperTune")
-                    } else if (res?.data?.status == "labelled") {                       
-                        handleApply("labelled")
-                    }else if(res?.data?.status == "HyperTune"){
-                        setCompletedSteps({...completedSteps,trainingStatus:true})
-                        handleApply("labelled")
-                    }else{
-                        updateIstate("labelled")
-                    }
-                }
-            } catch (err) {
-                console.log(err, "err")
+        fetchProjectStatus();
+    }, []);
+
+    // Sync iState with currentStep from backend
+    useEffect(() => {
+        if (!isLoading && currentStep) {
+            updateIstate(currentStep);
+        }
+    }, [currentStep, isLoading]);
+
+    // Sync completedSteps with stepStatus for backward compatibility
+    useEffect(() => {
+        if (stepStatus) {
+            const newCompletedSteps = {};
+            Object.keys(stepStatus).forEach(step => {
+                newCompletedSteps[step] = stepStatus[step].status === 'completed';
+            });
+            setCompletedSteps(prev => ({ ...prev, ...newCompletedSteps }));
+        }
+    }, [stepStatus]);
+
+    // Enhanced handleApply that updates backend and maintains existing behavior
+    const handleApply = async (step) => {
+        try {
+            // Update backend status
+            await updateStepStatus(step, 'completed');
+
+            // Update local state for immediate UI feedback
+            setCompletedSteps((prevSteps) => ({
+                ...prevSteps,
+                [step]: true
+            }));
+
+            // Move to next step
+            const nextStepIndex = stepsOrder.indexOf(step) + 1;
+            if (nextStepIndex < stepsOrder.length) {
+                const nextStep = stepsOrder[nextStepIndex];
+                updateIstate(nextStep);
+                await updateStepStatus(nextStep, 'in_progress');
+            }
+
+            // Clear Redux step change if needed
+            if (hasChangedSteps[step]) {
+                console.log(`API called for step: ${step}`);
+                dispatch(clearStepChange({ step }));
+            }
+        } catch (error) {
+            console.error('Error updating step status:', error);
+            // Fallback to original behavior if backend fails
+            setCompletedSteps((prevSteps) => ({
+                ...prevSteps,
+                [step]: true
+            }));
+            const nextStepIndex = stepsOrder.indexOf(step) + 1;
+            if (nextStepIndex < stepsOrder.length) {
+                updateIstate(stepsOrder[nextStepIndex]);
             }
         }
+    };
 
-        fetchStatus()
-    }, [])
-
-    const handleApply = (step) => {
-        setCompletedSteps((prevSteps) => ({ ...prevSteps, [step]: true }));
-
-        const nextStepIndex = stepsOrder.indexOf(step) + 1;
-        if (nextStepIndex < stepsOrder.length) {
-            updateIstate(stepsOrder[nextStepIndex]);
+    // Enhanced handleChange that updates backend
+    const handleChange = async (step) => {
+        try {
+            dispatch(markStepChanged({ step }));
+            if (isStepAccessible(step)) {
+                await updateStepStatus(step, 'in_progress');
+            }
+        } catch (error) {
+            console.error('Error updating step change:', error);
+            // Continue with original Redux behavior
+            dispatch(markStepChanged({ step }));
         }
-        if (hasChangedSteps[step]) {
-            console.log(`API called for step: ${step}`);
-            dispatch(clearStepChange({ step }));
-        }
     };
-    const handleChange = (step) => {
-        dispatch(markStepChanged({ step }));
-    };
-    const isStepAccessible = (step) => {
-        const stepIndex = stepsOrder?.indexOf(step);
-        return stepIndex === 0 || completedSteps[stepsOrder[stepIndex - 1]];
-    };
+
+    // Show loader while fetching status
+    if (isLoading) {
+        return (
+            <div>
+                <Header />
+                <Sidenav />
+                <div className="WrapperArea">
+                    <div className="WrapperBox">
+                        <div>Loading project status...</div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div>
-            <Header />
+            <Header />  
             <Sidenav />
             <div className="WrapperArea">
                 <div className="WrapperBox">
@@ -88,40 +145,55 @@ function DefectTraining() {
                     </div>
                     <div className="StepBox">
                         <ul>
-                            <li className="active">
+                            <li className={iState === "labelled" ? "active" : ""}>
                                 <a className="Text"
                                     onClick={() => isStepAccessible('labelled') && updateIstate('labelled')}
-                                    style={{ pointerEvents: isStepAccessible('labelled') ? 'auto' : 'none', color: isStepAccessible('labelled') ? 'inherit' : '#aaa' }}
+                                    style={{ pointerEvents: isStepAccessible('labelled') ? 'auto' : 'none', color: isStepAccessible('labelled') ? '#3cab4a' : '#aaa' }}
                                 >
-                                    Labelled Data
+                                    Upload Labelled Data
+                                    {stepStatus?.labelled?.status === 'completed' && ' ✓'}
                                 </a>
                             </li>
-                            <li className={iState == "labelled" ? "" : "active"}>
+                            <li className={iState === "HyperTune" ? "active" : ""}>
                                 <a className="Text"
                                     onClick={() => isStepAccessible('HyperTune') && updateIstate("HyperTune")}
-                                    style={{ pointerEvents: isStepAccessible('HyperTune') ? 'auto' : 'none', color: isStepAccessible('HyperTune') ? 'inherit' : '#aaa' }}
+                                    style={{ pointerEvents: isStepAccessible('HyperTune') ? 'auto' : 'none', color: isStepAccessible('HyperTune') ? '#3cab4a' : '#aaa' }}
                                 >
                                     Tune Hyper Parameters
+                                    {stepStatus?.HyperTune?.status === 'completed' && ' ✓'}
                                 </a>
                             </li>
-                            <li className={iState == "labelled" || iState == "HyperTune" ? "" : "active"}>
+                            <li className={iState === "infer" ? "active" : ""}>
                                 <a className="Text"
                                     onClick={() => isStepAccessible('infer') && updateIstate("infer")}
-                                    style={{ pointerEvents: isStepAccessible('infer') ? 'auto' : 'none', color: isStepAccessible('infer') ? 'inherit' : '#aaa' }}
+                                    style={{ pointerEvents: isStepAccessible('infer') ? 'auto' : 'none', color: isStepAccessible('infer') ? '#3cab4a' : '#aaa' }}
                                 >
                                     Infer Images
+                                    {stepStatus?.infer?.status === 'completed' && ' ✓'}
                                 </a>
                             </li>
-                            <li className={iState == "remark" ? "active" : ""}>
+                            <li className={iState === "remark" ? "active" : ""}>
                                 <a className="Text"
                                     onClick={() => isStepAccessible('remark') && updateIstate("remark")}
-                                    style={{ pointerEvents: isStepAccessible('remark') ? 'auto' : 'none', color: isStepAccessible('remark') ? 'inherit' : '#aaa' }}
+                                    style={{ pointerEvents: isStepAccessible('remark') ? 'auto' : 'none', color: isStepAccessible('remark') ? '#3cab4a' : '#aaa' }}
                                 >
                                     Remarks
+                                    {stepStatus?.remark?.status === 'completed' && ' ✓'}
+                                </a>
+                            </li>
+                            <li className={iState === "application" ? "active" : ""}>
+                                <a className="Text"
+                                    onClick={() => isStepAccessible('application') && updateIstate("application")}
+                                    style={{ pointerEvents: isStepAccessible('application') ? 'auto' : 'none', color: isStepAccessible('application') ? '#3cab4a        ' : '#aaa' }}
+                                >
+                                    Application
+                                    {stepStatus?.application?.status === 'completed' && ' ✓'}
                                 </a>
                             </li>
                         </ul>
                     </div>
+
+
                     {iState == "labelled" && <Defectlabelled
                         iState={iState}
                         state={state}
@@ -147,20 +219,37 @@ function DefectTraining() {
                         onChange={() => handleChange("remark")}
                     />}
 
-                    {/* {iState == "remark" && <Defe
+                    {iState == "remark" && <DefectRemark
                         iState={iState}
                         updateIstate={updateIstate}
                         state={state}
                         userData={userData}
+                        username={userData?.activeUser?.userName}
+                        task="defect-detection"
+                        project={state?.name}
+                        version={state?.version}
                         onApply={() => handleApply('remark')}
-                        onChange={() => handleChange("remark")}
-                    />} */}
+                        onChange={() => handleChange("application")}
+                    />}
+                    {iState == "application" && <Application
+                        iState={iState}
+                        url={url}
+                        setIstate={updateIstate}
+                        state={state}
+                        userData={userData}
+                        username={userData?.activeUser?.userName}
+                        task="defect-detection"
+                        project={state?.name}
+                        version={state?.version}
+                        onApply={() => handleApply('application')}
+                        onChange={() => handleChange("application")}
+                    />}
                 </div>
             </div>
 
         </div>
-    )
+    );
 }
 
-export default DefectTraining
 
+export default DefectTraining

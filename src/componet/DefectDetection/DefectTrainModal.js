@@ -16,7 +16,7 @@ function DefectTrainModal({ data, setData, onApply, state, userData, type, model
     //================USEEFFECT TO HIT TRAIN API========================================
     useEffect(() => {
         const getData = async () => {
-            const res = await dispatch(DefectModalTrain({ username: userData?.activeUser?.name, version: state?.version, project: state?.name, task: "defect-detection", model: model }))            
+            const res = await dispatch(DefectModalTrain({ username: userData?.activeUser?.userName, version: state?.version, project: state?.name, task: "defect-detection", model: model }))            
             if (!res?.payload?.confusion_matrix) {
                 toast.error(res?.payload?.message, commomObj)
             } 
@@ -25,7 +25,7 @@ function DefectTrainModal({ data, setData, onApply, state, userData, type, model
             }
         }
         const getAccuracyData=async()=>{
-            const res = await dispatch(InferAccuracy({ username: userData?.activeUser?.name, version: state?.version, project: state?.name, task: "defect-detection", model: model })) 
+            const res = await dispatch(InferAccuracy({ username: userData?.activeUser?.userName, version: state?.version, project: state?.name, task: "defect-detection", model: model })) 
             console.log(res, "response of defect train data")          
             if (!res?.payload?.confusion_matrix) {
                 toast.error(res?.payload?.message, commomObj)
@@ -78,7 +78,7 @@ function DefectTrainModal({ data, setData, onApply, state, userData, type, model
                                                 <tr>
                                                     <td>Class {`<bad>`} </td>
                                                     <td>{newData?.confusion_matrix?.Class_bad?.Correct_Predictions}</td>
-                                                    <td>{newData?.confusion_matrix?.Class_bad?.Incorrect_Predictionis}</td>
+                                                    <td>{newData?.confusion_matrix?.Class_bad?.Incorrect_Predictions}</td>
                                                 </tr>
                                             </> : (
                                                 <tr>

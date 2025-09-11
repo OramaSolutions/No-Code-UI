@@ -1,8 +1,6 @@
 import React, { useState } from 'react'
 import Modal from 'react-bootstrap/Modal';
-import { useDispatch, useSelector } from 'react-redux';
-import { DefectModalTrain } from '../../reduxToolkit/Slices/defectSlices';
-import DefectTrainModal from './DefectTrainModal';
+
 
 function DefectVisualize({ onApply, state, userData, task, setData, data, model }) {
     const { defectTrainData } = data;

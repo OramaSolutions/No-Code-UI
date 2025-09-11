@@ -17,7 +17,7 @@ function InferResultModal({ onOpen, output, setOutput, state, userData, selected
                     try {
                         setLoading(true);
                         const timestamp = new Date().getTime();
-                        const inferUrl = `${url}infer_yolov8?username=${userData?.activeUser?.name}&task=object_detection&project=${state?.name}&version=${state?.version}&timestamp=${timestamp}`;
+                        const inferUrl = `${url}infer_yolov8?username=${userData?.activeUser?.userName}&task=object_detection&project=${state?.name}&version=${state?.version}&timestamp=${timestamp}`;
                         const response = await axios.get(inferUrl, {
                             responseType: 'blob', // ✅ critical for binary/image data
                         });

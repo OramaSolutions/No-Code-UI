@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Header from '../../commonComponent/Header'
 import Sidenav from '../../commonComponent/Sidenav'
 import Classlabelled from './Classlabelled'
@@ -8,38 +8,69 @@ import ClassDataSplit from './ClassDataSplit'
 import ClassHyperTune from './ClassHyperTune'
 import ClassInferImages from './ClassInferImages'
 import ClassRemark from './ClassRemark'
+import Application from './Application'
 import { useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux'
 import { markStepChanged, clearStepChange } from '../../reduxToolkit/Slices/stepSlices'
 
 function ClassificationTraining() {
     const dispatch = useDispatch();
-    const [iState, updateIstate] = useState("labelled")
+    const { state } = useLocation();
+    // const [iState, updateIstate] = useState("infer")
     const userData = JSON.parse(window.localStorage.getItem("userLogin"))
     const { hasChangedSteps } = useSelector((state) => state.steps);
-    const [completedSteps, setCompletedSteps] = useState({
-        labelled: false,
-        augumented: false,
-        images: false,
-        dataSplit: false,
-        HyperTune: false,
-        infer: false,
-        remark: false
-    });
-    const { state } = useLocation();
+    // const [completedSteps, setCompletedSteps] = useState({
+    //     labelled: false,
+    //     augumented: false,
+    //     images: false,
+    //     dataSplit: false,
+    //     HyperTune: false,
+    //     infer: false,
+    //     remark: false
+    // });
+    const userName = userData?.activeUser.userName || "anon";
+    console.log('username', userName, userData)
+    const LOCAL_KEY = state
+        ? `cls_steps_${userName}_${state.name}_${state.version}`
+        : `cls_steps_${userName}`;
 
-    const stepsOrder = ['labelled', 'augumented', 'images', 'dataSplit', 'HyperTune', 'infer', 'remark'];
+    const [completedSteps, setCompletedSteps] = useState(() => {
+        if (state) {
+            const saved = JSON.parse(localStorage.getItem(LOCAL_KEY));
+            return saved?.completedSteps || {
+                labelled: false, augumented: false, images: false,
+                dataSplit: false, HyperTune: false, infer: false, remark: false
+            };
+        }
+        return {
+            labelled: false, augumented: false, images: false,
+            dataSplit: false, HyperTune: false, infer: false, remark: false
+        };
+    });
+
+    const [iState, updateIstate] = useState(() => {
+        if (state) {
+            const saved = JSON.parse(localStorage.getItem(LOCAL_KEY));
+            // return saved?.iState || 'labelled';
+            return 'remark'
+        }
+        return 'labelled';
+    });
+
+
+
+    const stepsOrder = ['labelled', 'augumented', 'images', 'dataSplit', 'HyperTune', 'infer', 'remark', 'application'];
 
     const handleApply = (step) => {
         setCompletedSteps((prevSteps) => ({ ...prevSteps, [step]: true }));
         console.log(`Step ${step} completed`);
         const nextStepIndex = stepsOrder.indexOf(step) + 1;
         if (nextStepIndex < stepsOrder.length) {
-           
+
             updateIstate(stepsOrder[nextStepIndex]);
         }
         if (hasChangedSteps[step]) {
-           
+
             console.log(`API called for step: ${step}`);
             dispatch(clearStepChange({ step }));
         }
@@ -49,9 +80,24 @@ function ClassificationTraining() {
     };
     const isStepAccessible = (step) => {
         const stepIndex = stepsOrder?.indexOf(step);
-      
+
         return stepIndex === 0 || completedSteps[stepsOrder[stepIndex - 1]];
     };
+
+    // for persistent state management
+
+    // Save to localStorage on state change
+    useEffect(() => {
+        if (state) {
+            localStorage.setItem(LOCAL_KEY, JSON.stringify({
+                completedSteps,
+                iState,
+            }));
+        }
+    }, [completedSteps, iState, state]);
+
+
+    // ----------
     return (
         <div>
             <Header />
@@ -64,7 +110,7 @@ function ClassificationTraining() {
                         </h2>
                         <h4 className="NewTitle">Model: Classification</h4>
                     </div>
-                    <div className="StepBox">
+                    <div className="StepBox text-xs">
                         <ul>
                             <li className="active">
                                 <a className="Text"
@@ -114,12 +160,20 @@ function ClassificationTraining() {
                                     Infer Images
                                 </a>
                             </li>
-                            <li className={iState == "remark" ? "active" : ""}>
+                            <li className={iState == "remark" || iState === 'application' ? "active" : ""}>
                                 <a className="Text"
                                     onClick={() => isStepAccessible('remark') && updateIstate("remark")}
                                     style={{ pointerEvents: isStepAccessible('remark') ? 'auto' : 'none', color: isStepAccessible('remark') ? 'inherit' : '#aaa' }}
                                 >
                                     Remarks
+                                </a>
+                            </li>
+                             <li className={iState == "application" ? "active" : ""}>
+                                <a className="Text"
+                                    onClick={() => isStepAccessible('application') && updateIstate("application")}
+                                    style={{ pointerEvents: isStepAccessible('application') ? 'auto' : 'none', color: isStepAccessible('application') ? 'inherit' : '#aaa' }}
+                                >
+                                    Application
                                 </a>
                             </li>
                         </ul>
@@ -171,8 +225,20 @@ function ClassificationTraining() {
                         updateIstate={updateIstate}
                         state={state}
                         userData={userData}
+                        username={userData?.activeUser?.userName}
+                        task="classification"
+                        project={state?.name}
+                        version={state?.version}
                         onApply={() => handleApply('remark')}
-                        onChange={() => handleChange("remark")}
+                        onChange={() => handleChange("application")}
+                    />}
+                     {iState == "application" && <Application
+                        iState={iState}
+                        setIstate={updateIstate}
+                        state={state}
+                        userData={userData}
+                        onApply={() => handleApply('application')}
+                        onChange={() => handleChange("application")}
                     />}
                 </div>
             </div>

@@ -10,14 +10,14 @@ const initialState = {
     versionNumber: "",
 }
 
-function CreateVersion({ show, setShow,model }) {
+function CreateVersion({ show, setShow, model }) {
     const [istate, setIstate] = useState(initialState)
-    const[error,setError]=useState(false)
+    const [error, setError] = useState(false)
     const { versionNumber } = istate;
-    const { openVersion,projectName } = show;
-    const navigate=useNavigate();
+    const { openVersion, projectName } = show;
+    const navigate = useNavigate();
     const dispatch = useDispatch();
-    const redirect=model=="Object Detection"?"/training":model=="Classification"?"/classification-training":"/detection-training"
+    const redirect = model == "Object Detection" ? "/training" : model == "Classification" ? "/classification-training" : "/detection-training"
 
     const handleclose = () => {
         setShow({ ...show, openVersion: false })
@@ -28,22 +28,27 @@ function CreateVersion({ show, setShow,model }) {
     }
     const saveHandler = async () => {
         try {
-            if (!versionNumber.trim()) {
-                setError(true)
+            if (!versionNumber || !versionNumber.trim()) {
+                setError(true);
             } else {
-                const data = { model, name: projectName,versionNumber }
-                const response = await dispatch(createProject(data))
-                if (response?.payload?.code === 200) {
-                    toast.success(response?.payload?.message, commomObj);
-                    setShow({ ...show, openVersion:false})
-                    navigate(redirect,{ state:{name:response?.payload?.addBanner?.name,version:response?.payload?.addBanner?.versionNumber,projectId:response?.payload?.addBanner?._id} })
-                }
-                else {
-                    toast.error(response?.payload?.message, commomObj);
-                    // updateIstate({...istate,loading:true}) 
+                const data = { model, name: projectName, versionNumber };
+                const response = await dispatch(createProject(data));
 
+                if (response?.payload?.code === 200 || response?.payload?.code === 201) {
+                    toast.success(response?.payload?.message, commomObj);
+                    setShow({ ...show, openVersion: false });
+                    navigate(redirect, {
+                        state: {
+                            name: response?.payload?.data?.name || response?.payload?.addBanner?.name,
+                            version: response?.payload?.data?.versionNumber || response?.payload?.addBanner?.versionNumber,
+                            projectId: response?.payload?.data?._id || response?.payload?.addBanner?._id
+                        }
+                    });
+                } else {
+                    toast.error(response?.payload?.message, commomObj);
                 }
             }
+
 
         } catch (err) {
             console.log(err, "err")
@@ -75,7 +80,7 @@ function CreateVersion({ show, setShow,model }) {
                                 onChange={inputHandler}
                             />
                             {error && (!versionNumber.trim()) ? <span style={{ color: 'red' }} >"*Required to fill"</span> : ""}
-                        </div>                        
+                        </div>
                         <a
                             className="Button"
                             onClick={saveHandler}

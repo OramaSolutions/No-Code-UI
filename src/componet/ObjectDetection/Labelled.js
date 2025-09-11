@@ -34,7 +34,7 @@ function Labelled({ iState, updateIstate, userData, state, onApply,onChange, url
     useEffect(() => {
         const fetchAndSaveStreamingZip = async () => {
             try {
-                const response = await fetch(`${url}return_import_dataset?username=${userData?.activeUser?.name}&task=object_detection&project=${state?.name}&version=${state?.version}`, {
+                const response = await fetch(`${url}return_import_dataset?username=${userData?.activeUser?.userName}&task=object_detection&project=${state?.name}&version=${state?.version}`, {
                     method: 'GET',
                 });
                 console.log(response, "responseeee")
@@ -111,7 +111,7 @@ function Labelled({ iState, updateIstate, userData, state, onApply,onChange, url
 
         const formData = new FormData();
         formData.append("file", selectedFile);
-        formData.append("username", userData?.activeUser?.name);
+        formData.append("username", userData?.activeUser?.userName);
         formData.append("version", state?.version);
         formData.append("project", state?.name);
         formData.append("width", width);
@@ -163,7 +163,7 @@ function Labelled({ iState, updateIstate, userData, state, onApply,onChange, url
         }
         const formData = new FormData();
         formData.append("file", selectedFile);
-        formData.append("username", userData?.activeUser?.name);
+        formData.append("username", userData?.activeUser?.userName);
         formData.append("version", state?.version);
         formData.append("project", state?.name);
         formData.append("task", "object_detection");

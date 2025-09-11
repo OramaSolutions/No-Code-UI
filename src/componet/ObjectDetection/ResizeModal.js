@@ -10,7 +10,7 @@ function ResizeModal({ onOpen, onClose,istate,setIstate,setSelectedFile,handleCa
     }
 
     const handleDownloadAndCloseModal = () => {
-        const downloadUrl = `${url}download_resized_images?username=${userData?.activeUser?.name}&task=${task}&project=${state?.name}&version=${state?.version}`;         
+        const downloadUrl = `${url}download_resized_images?username=${userData?.activeUser?.userName}&task=${task}&project=${state?.name}&version=${state?.version}`;         
         window.open(downloadUrl, '_blank');
         setIstate({...istate,imageUrls:[],open:false,resizecheck:false,width:null,})
         setSelectedFile(null) 

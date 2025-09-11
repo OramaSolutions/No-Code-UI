@@ -35,7 +35,7 @@ function TrainModel({ initialData, setState, onApply, userData, state, task, api
             updateIstate({ ...istate, opentrainModal: true })
             handleclose();
             pollUntilImageExists();
-            const response = await fetch(`${url}${apiPoint}?username=${userData?.activeUser?.name}&task=${task}&project=${state?.name}&version=${state?.version}`, {
+            const response = await fetch(`${url}${apiPoint}?username=${userData?.activeUser?.userName}&task=${task}&project=${state?.name}&version=${state?.version}`, {
                 method: 'GET',
             });
             if (!response.ok) {
@@ -61,7 +61,7 @@ function TrainModel({ initialData, setState, onApply, userData, state, task, api
     };
 
     const pollUntilImageExists = async () => {
-        const pollUrl = `${url}train_batch_img_get?username=${userData?.activeUser?.name}&task=${task}&project=${state?.name}&version=${state?.version}`;
+        const pollUrl = `${url}train_batch_img_get?username=${userData?.activeUser?.userName}&task=${task}&project=${state?.name}&version=${state?.version}`;
         console.log('calling ', pollUrl)
         const poll = async () => {
             try {

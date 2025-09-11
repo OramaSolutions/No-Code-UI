@@ -6,26 +6,30 @@ import { toast } from 'react-toastify';
 import { commomObj } from '../../utils';
 import Loader from '../../commonComponent/Loader';
 import useDebounce from '../Project/Debouncing';
-import { ClassDataSplitImages, ReturnClassDataSplit } from '../../reduxToolkit/Slices/classificationSlices';
+import { ClassDataSplitImages, ReturnClassDataSplit, PreviewDataSplitImages } from '../../reduxToolkit/Slices/classificationSlices';
 import { getUrl } from '../../config/config';
+
 const url = getUrl('classification')
+
 function ClassDataSplit({ onApply, userData, state }) {
     const dispatch = useDispatch()
     const AgumentedSize = window.localStorage.getItem("AgumentedSize") || 0
     const [trainingPercentage, setTrainingPercentage] = useState(80);
-    const [flag, setFlag] = useState(false)
-    const debouncedTrainingPercentage = useDebounce((trainingPercentage / 100).toFixed(2), 300);
-    const { datasplitImages, loading } = useSelector((state) => state.classification)
+    const [dataSplitCompleted, setDataSplitCompleted] = useState(false);
+    const [showPreview, setShowPreview] = useState(false);
+
+    const { datasplitImages, previewImages, loading, previewLoading } = useSelector((state) => state.classification)
     const { hasChangedSteps } = useSelector((state) => state.steps);
-    console.log(hasChangedSteps, "datasplitImages")
 
     const handleSliderChange = (value) => {
         setTrainingPercentage(value);
     };
+
+    // Load existing data split configuration on component mount
     useEffect(() => {
         const getData = async () => {
             const payload = {
-                username: userData?.activeUser?.name,
+                username: userData?.activeUser?.userName,
                 version: state?.version,
                 project: state?.name,
                 task: "classification",
@@ -38,44 +42,68 @@ function ClassDataSplit({ onApply, userData, state }) {
                 if (res?.payload?.data?.split_ratio) {
                     setTrainingPercentage((res?.payload?.data?.split_ratio) * 100 || 80)
                 }
-                setFlag(true)
-            } else {
-                console.log('in else block setting flag to true')
-                setFlag(true)
+                // Check if data split was already completed
+                if (res?.payload?.data?.split_completed) {
+                    setDataSplitCompleted(true);
+                }
             }
         }
-
         getData()
     }, []);
 
-    useEffect(() => {
-        console.log('flag>>>', flag)
-        if (flag) {
-            console.log("Dispatching data split with ratio:", debouncedTrainingPercentage);
+    // Handle Apply button click - perform data split
+    const handleApply = async () => {
+        try {
             const payload = {
-                username: userData?.activeUser?.name,
+                username: userData?.activeUser?.userName,
                 version: state?.version,
                 project: state?.name,
                 task: "classification",
-                split_ratio: debouncedTrainingPercentage || 0.80
+                split_ratio: (trainingPercentage / 100).toFixed(2)
             }
-            dispatch(ClassDataSplitImages({
+
+            const res = await dispatch(ClassDataSplitImages({
                 payload, url
-
             }));
+            console.log('>>', res)
+            if (res?.payload?.code === 200) {
+                setDataSplitCompleted(true);
+                toast.success("Data split completed successfully!");
+                onApply(); // Call parent's onApply
+            } else {
+                toast.error("Failed to split data. Please try again.");
+            }
+        } catch (error) {
+            console.error("Error splitting data:", error);
+            toast.error("An error occurred while splitting data.");
         }
-    }, [debouncedTrainingPercentage, flag]);
+    };
 
-    useEffect(() => {
-        console.log('debouncedTrainingPercentage>>>', debouncedTrainingPercentage)
-    }, [debouncedTrainingPercentage])
+    // Handle Preview button click - load preview images
+    const handlePreview = async () => {
+        try {
+            const payload = {
+                username: userData?.activeUser?.userName,
+                version: state?.version,
+                project: state?.name,
+                task: "classification"
+            }
 
-    const saveHandler = () => {
-        // if(hasChangedSteps?.dataSplit){
-        //     onChange()
-        // }
-        onApply();
-    }
+            const res = await dispatch(PreviewDataSplitImages({
+                payload, url
+            }));
+
+            if (res?.payload?.status === 200) {
+                setShowPreview(true);
+            } else {
+                toast.error("Failed to load preview images.");
+            }
+        } catch (error) {
+            console.error("Error loading preview:", error);
+            toast.error("An error occurred while loading preview images.");
+        }
+    };
+
     return (
         <>
             <div className="Small-Wrapper">
@@ -134,6 +162,7 @@ function ClassDataSplit({ onApply, userData, state }) {
                                         trackClassName="custom-slider-track"
                                         handleClassName="custom-slider-handle"
                                         className="custom-slider"
+                                        disabled={dataSplitCompleted} // Disable slider after split is completed
                                     />
                                 </div>
                             </div>
@@ -141,69 +170,114 @@ function ClassDataSplit({ onApply, userData, state }) {
                                 <div className="col-lg-6">
                                     <div className="form-group">
                                         <label>Training Set</label>
-                                        <input type="text" className="form-control" value={Math.trunc((trainingPercentage * AgumentedSize) / 100)} />
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={Math.trunc((trainingPercentage * AgumentedSize) / 100)}
+                                            disabled
+                                        />
                                     </div>
                                 </div>
                                 <div className="col-lg-6">
                                     <div className="form-group">
                                         <label>Validation Set</label>
-                                        <input type="text" className="form-control" value={Math.trunc(((100 - trainingPercentage) * AgumentedSize) / 100)} />
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={Math.trunc(((100 - trainingPercentage) * AgumentedSize) / 100)}
+                                            disabled
+                                        />
                                     </div>
                                 </div>
                             </div>
-                            <div className="row">
-                                <div className="col-lg-6">
-                                    <div className="DataPreviewAugment">
-                                        <h6>Preview Images</h6>
-                                        {!loading ? <ul>
-                                            {datasplitImages?.train_encoded_images?.length > 0 ? datasplitImages?.train_encoded_images?.map((base64) => (
-                                                <li>
-                                                    <figure>
-                                                        {base64 && <img src={`data:image/png;base64,${base64}`} />}
-                                                    </figure>
-                                                </li>
-                                            )) : <p><b>No Data Found</b></p>}
 
-                                        </ul> : <Loader
-                                            item={"200px"}
-                                        />}
+                            {/* Show preview images only if showPreview is true */}
+                            {showPreview && (
+                                <div className="row">
+                                    <div className="col-lg-6">
+                                        <div className="DataPreviewAugment">
+                                            <h6>Training Set Preview</h6>
+                                            {!previewLoading ? (
+                                                <ul>
+                                                    {previewImages?.images?.filter(img => img.data_type === 'train')?.length > 0 ?
+                                                        previewImages.images
+                                                            .filter(img => img.data_type === 'train')
+                                                            .map((image, index) => (
+                                                                <li key={index}>
+                                                                    <figure>
+                                                                        <img src={`data:image/png;base64,${image.data}`} alt={image.filename} />
+                                                                    </figure>
+                                                                </li>
+                                                            )) : <p><b>No Training Data Found</b></p>
+                                                    }
+                                                </ul>
+                                            ) : (
+                                                <Loader item={"200px"} />
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="col-lg-6">
+                                        <div className="DataPreviewAugment">
+                                            <h6>Validation Set Preview</h6>
+                                            {!previewLoading ? (
+                                                <ul>
+                                                    {previewImages?.images?.filter(img => img.data_type === 'val')?.length > 0 ?
+                                                        previewImages.images
+                                                            .filter(img => img.data_type === 'val')
+                                                            .map((image, index) => (
+                                                                <li key={index}>
+                                                                    <figure>
+                                                                        <img src={`data:image/png;base64,${image.data}`} alt={image.filename} />
+                                                                    </figure>
+                                                                </li>
+                                                            )) : <p><b>No Validation Data Found</b></p>
+                                                    }
+                                                </ul>
+                                            ) : (
+                                                <Loader item={"200px"} />
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="col-lg-6">
-                                    <div className="DataPreviewAugment">
-                                        <h6>Preview Images</h6>
-                                        {!loading ? <ul>
-                                            {datasplitImages?.val_encoded_images?.length > 0 ? datasplitImages?.val_encoded_images?.map((base64) => (
-                                                <li>
-                                                    <figure>
-                                                        {base64 && <img src={`data:image/png;base64,${base64}`} />}
-                                                    </figure>
-                                                </li>
-                                            )) : <p><b>No Data Found</b></p>}
+                            )}
 
-                                        </ul> : <Loader
-                                            item={"200px"}
-                                        />}
-                                    </div>
-                                </div>
-                            </div>
                             <div className="row">
                                 <div className="col-lg-7 mx-auto">
                                     <div className="TwoButtons">
-                                        {/* <a                                           
-                                            className="OutlineBtn"
-                                        >
-                                            Cancel
-                                        </a> */}
-                                        <a role='button' className="FillBtn" onClick={saveHandler}>
-                                            Apply
-                                        </a>
+                                        {!dataSplitCompleted ? (
+                                            <a
+                                                role='button'
+                                                className="FillBtn"
+                                                onClick={handleApply}
+                                                disabled={loading}
+                                            >
+                                                {loading ? 'Splitting...' : 'Apply'}
+                                            </a>
+                                        ) : (
+                                            <div style={{ display: 'flex', gap: '10px' }}>
+                                                <a
+                                                    role='button'
+                                                    className="OutlineBtn"
+                                                    onClick={handlePreview}
+                                                    disabled={previewLoading}
+                                                >
+                                                    {previewLoading ? 'Loading...' : 'Preview Images'}
+                                                </a>
+                                                <a
+                                                    role='button'
+                                                    className="FillBtn"
+                                                    onClick={() => onApply()}
+                                                >
+                                                    Continue
+                                                </a>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
                         </form>
                     </div>
-                </fieldset >
+                </fieldset>
             </div>
         </>
     )

@@ -42,7 +42,7 @@ function InferImages({ userData, state }) {
         }
         try {
             const formData = new FormData();
-            formData.append("username", userData?.activeUser?.name);
+            formData.append("username", userData?.activeUser?.userName);
             formData.append("version", state?.version);
             formData.append("project", state?.name);
             formData.append("task", "object_detection");

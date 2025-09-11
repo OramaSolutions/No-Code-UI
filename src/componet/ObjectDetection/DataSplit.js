@@ -25,7 +25,7 @@ function DataSplit({ onApply, userData, state, onChange, url }) {
     useEffect(() => {
         const getData = async () => {
             const payload ={
-                username: userData?.activeUser?.name,
+                username: userData?.activeUser?.userName,
                 version: state?.version,
                 project: state?.name,
                 task: "object_detection",
@@ -47,7 +47,7 @@ function DataSplit({ onApply, userData, state, onChange, url }) {
     useEffect(() => {
         if (flag) {
             const payload = {
-                username: userData?.activeUser?.name,
+                username: userData?.activeUser?.userName,
                 version: state?.version,
                 project: state?.name,
                 task: "object_detection",

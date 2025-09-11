@@ -35,7 +35,7 @@ function DefectInfer({ userData, state, onApply, onChange }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get(`${url}get_confidence?username=${userData?.activeUser?.name}&task=defect-detection&project_name=${state?.name}&version=${state?.version}`)
+                const res = await axios.get(`${url}get_confidence?username=${userData?.activeUser?.userName}&task=defect-detection&project_name=${state?.name}&version=${state?.version}`)
                 console.log(res, "response of infer confidence")
                 if (res?.status == 200) {
                     updateIstate({ ...istate, confidence: (res?.data?.confidence).toFixed(2) || 0 })
@@ -73,7 +73,7 @@ function DefectInfer({ userData, state, onApply, onChange }) {
         }
         try {
             const formData = new FormData();
-            formData.append("username", userData?.activeUser?.name);
+            formData.append("username", userData?.activeUser?.userName);
             formData.append("version", state?.version);
             formData.append("project_name", state?.name);
             formData.append("task", "defect-detection");

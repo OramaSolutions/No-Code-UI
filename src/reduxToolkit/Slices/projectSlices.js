@@ -315,10 +315,10 @@ export const checkProject = createAsyncThunk('project/checkproject', async (payl
 })
 
 //=============================================remark data================================================
-export const remarkData = createAsyncThunk('project/remarkdata', async (payload, { rejectWithValue }) => {
+export const remarkData = createAsyncThunk('project/remarkdata', async ({payload, url}, { rejectWithValue }) => {
   try {
     const token = isLoggedIn("userLogin");
-    const response = await axios.post(`${Url}user/addRemark`, payload, {
+    const response = await axios.post(`${url}remark`, payload, {
       headers: { Authorization: `${token}` },
     });
     if (response.status === 200) {
@@ -329,6 +329,29 @@ export const remarkData = createAsyncThunk('project/remarkdata', async (payload,
   }
   catch (err) {
     return rejectWithValue(err.response.data);
+  }
+})
+
+export const getRemarkData = createAsyncThunk('project/getRemarkData', async ({ url, username, task, project, version }, { rejectWithValue }) => {
+  try {
+    const token = isLoggedIn("userLogin");
+    const response = await axios.get(`${url}remark`, {
+      headers: { Authorization: `${token}` },
+      params: {
+        username,
+        task,
+        project,
+        version
+      }
+    });
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      return rejectWithValue(response.data);
+    }
+  }
+  catch (err) {
+    return rejectWithValue(err.response?.data || err.message);
   }
 })
 

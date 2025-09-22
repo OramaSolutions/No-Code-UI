@@ -6,7 +6,7 @@ import axios from 'axios';
 
 import { getUrl } from '../../config/config';
 
-const url = getUrl('defect-detection')
+const url = getUrl('defectdetection')
 
 function DefectInferResultModal({ output, setOutput, state, userData, onApply, onChange, setSelectedFile }) {
     const { inferData, onOpen } = output;

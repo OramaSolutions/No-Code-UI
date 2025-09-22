@@ -52,6 +52,7 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
     console.log(iState, "istateeeeee")
     const abortControllerReff = useRef();
     const dispatch = useDispatch()
+    const [sampleImageUrl, setSampleImageUrl] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -60,7 +61,7 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
                     username: userData?.activeUser?.userName,
                     version: state?.version,
                     project: state?.name,
-                    task: "object_detection",
+                    task: "objectdetection",
                 }
                 const res = await dispatch(ReturnAgumentation({ payload, url }));
                 if (res?.payload?.status === 200) {
@@ -103,6 +104,27 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
         }
         fetchData();
     }, [])
+
+    useEffect(() => {
+        const fetchSampleImage = async () => {
+            try {
+                const params = new URLSearchParams({
+                    username: userData?.activeUser?.userName,
+                    task: "objectdetection",
+                    project: state?.name,
+                    version: state?.version
+                });
+                const response = await fetch(`${url}/return_sample_for_aug?${params.toString()}`);
+                if (response.ok) {
+                    const blob = await response.blob();
+                    setSampleImageUrl(URL.createObjectURL(blob));
+                }
+            } catch (err) {
+                console.error("Failed to fetch sample image", err);
+            }
+        };
+        fetchSampleImage();
+    }, [userData, state]);
 
     const checkHandler = (e) => {
         const { name, checked, value } = e.target;
@@ -165,7 +187,7 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
                 formData.append("username", userData?.activeUser?.userName);
                 formData.append("version", state?.version)
                 formData.append("project", state?.name);
-                formData.append("task", "object_detection");
+                formData.append("task", "objectdetection");
                 formData.append("json_data", jsonString);
                 formData.append("num_of_images_to_be_generated", num_of_images_to_be_generated);
 
@@ -173,7 +195,7 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
                 //     console.log(`${pair[0]}:`, pair[1]);
                 // }
 
-                const response = await dispatch(AugumentedData({ payload:formData, signal: abortControllerReff.current.signal, url }))
+                const response = await dispatch(AugumentedData({ payload: formData, signal: abortControllerReff.current.signal, url }))
                 console.log(response, "augmentations response")
                 if (response?.payload?.code === 201) {
                     updateIstate({ ...iState, openModal: false })
@@ -334,13 +356,13 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
                             <ul className="PreviewAugment">
                                 <li>
                                     <figure>
-                                        {DatasetSize?.image && <img src={DatasetSize?.image} />}
+                                        {sampleImageUrl && <img src={sampleImageUrl} alt="Sample" />}
                                     </figure>
                                 </li>
                                 <li>
                                     <figure>
                                         <img
-                                            src={DatasetSize?.image}
+                                            src={sampleImageUrl}
                                             alt="Augmented"
                                             style={{
                                                 transform: rotation ? `rotate(${rotate_limit}deg)` : "",
@@ -507,13 +529,13 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
                             <ul className="PreviewAugment">
                                 <li>
                                     <figure>
-                                        <img src={DatasetSize?.image} />
+                                        {sampleImageUrl && <img src={sampleImageUrl} alt="Sample" />}
                                     </figure>
                                 </li>
                                 <li>
                                     <figure>
                                         <img
-                                            src={DatasetSize?.image}
+                                            src={sampleImageUrl}
                                             style={crop ? {
                                                 width: cropX,
                                                 height: cropY,
@@ -583,13 +605,13 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
                             <ul className="PreviewAugment">
                                 <li>
                                     <figure>
-                                        <img src={DatasetSize?.image} />
+                                        {sampleImageUrl && <img src={sampleImageUrl} alt="Sample" />}
                                     </figure>
                                 </li>
                                 <li>
                                     <figure>
                                         <img
-                                            src={DatasetSize?.image}
+                                            src={sampleImageUrl}
                                             style={{
                                                 transform: verticalFlip ? "scaleY(-1)" : "",
                                             }}
@@ -655,13 +677,13 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
                             <ul className="PreviewAugment">
                                 <li>
                                     <figure>
-                                        <img src={DatasetSize?.image} />
+                                        {sampleImageUrl && <img src={sampleImageUrl} alt="Sample" />}
                                     </figure>
                                 </li>
                                 <li>
                                     <figure>
                                         <img
-                                            src={DatasetSize?.image}
+                                            src={sampleImageUrl}
                                             style={{
                                                 transform: horizontalFlip ? "scaleX(-1)" : "",
                                             }}
@@ -753,13 +775,13 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
                             <ul className="PreviewAugment">
                                 <li>
                                     <figure>
-                                        <img src={DatasetSize?.image} />
+                                        {sampleImageUrl && <img src={sampleImageUrl} alt="Sample" />}
                                     </figure>
                                 </li>
                                 <li>
                                     <figure>
                                         <img
-                                            src={DatasetSize?.image}
+                                            src={sampleImageUrl}
                                             style={
                                                 brightness
                                                     ? { filter: `brightness(${brightness_limit * 20}%)` }
@@ -852,13 +874,13 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
                             <ul className="PreviewAugment">
                                 <li>
                                     <figure>
-                                        <img src={DatasetSize?.image} />
+                                        {sampleImageUrl && <img src={sampleImageUrl} alt="Sample" />}
                                     </figure>
                                 </li>
                                 <li>
                                     <figure>
                                         <img
-                                            src={DatasetSize?.image}
+                                            src={sampleImageUrl}
                                             style={{ filter: contrast ? `contrast(${contrast_limit * 20}%)` : {} }}
                                         />
                                     </figure>
@@ -946,13 +968,13 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
                             <ul className="PreviewAugment">
                                 <li>
                                     <figure>
-                                        <img src={DatasetSize?.image} />
+                                        {sampleImageUrl && <img src={sampleImageUrl} alt="Sample" />}
                                     </figure>
                                 </li>
                                 <li>
                                     <figure>
                                         <img
-                                            src={DatasetSize?.image}
+                                            src={sampleImageUrl}
                                             style={{
 
                                                 filter: stauration ? `saturate(${hue_saturation_limit})` : {}
@@ -1044,13 +1066,13 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
                             <ul className="PreviewAugment">
                                 <li>
                                     <figure>
-                                        <img src={DatasetSize?.image} />
+                                        <img src={sampleImageUrl} />
                                     </figure>
                                 </li>
                                 <li>
                                     <figure>
                                         <img
-                                            src={DatasetSize?.image}
+                                            src={sampleImageUrl}
                                             style={{
                                                 filter: noise ? `contrast(${gauss_noise_var_limit}) brightness(${1 / gauss_noise_var_limit})` : "",
                                             }}
@@ -1141,13 +1163,13 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
                             <ul className="PreviewAugment">
                                 <li>
                                     <figure>
-                                        <img src={DatasetSize?.image} />
+                                        <img src={sampleImageUrl} />
                                     </figure>
                                 </li>
                                 <li>
                                     <figure>
                                         <img
-                                            src={DatasetSize?.image}
+                                            src={sampleImageUrl}
                                             style={{
                                                 filter: blur ? `blur(${blur_limit}px)` : "",
                                             }}

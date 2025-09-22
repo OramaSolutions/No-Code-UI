@@ -224,6 +224,7 @@ export const ClassStopDataTransfer = createAsyncThunk('classification/classStopD
         return rejectWithValue(err.response.data);
     }
 })
+
 //===============================================class infer images====================================
 export const ClassinferImages = createAsyncThunk('classification/inferimages', async ({ payload, url }, { rejectWithValue }) => {
     try {

@@ -11,26 +11,28 @@ import useDebounce from './Debouncing';
 
 function DataSplit({ onApply, userData, state, onChange, url }) {
     const dispatch = useDispatch()
-    const AgumentedSize = window.localStorage.getItem("AgumentedSize") || 0
+    // const AgumentedSize = window.localStorage.getItem("AgumentedSize") || 0
     const [trainingPercentage, setTrainingPercentage] = useState(80);
     const [flag, setFlag] = useState(false)
     const debouncedTrainingPercentage = useDebounce((trainingPercentage / 100).toFixed(2), 300);
-    const { datasplitImages, loading } = useSelector((state) => state.project)
+    const { loading } = useSelector((state) => state.project)
     const { hasChangedSteps } = useSelector((state) => state.steps);
     console.log(hasChangedSteps, "datasplitImages")
 
+    const AgumentedSize = useSelector((state) => state.project.totalImages);
+    
     const handleSliderChange = (value) => {
         setTrainingPercentage(value);
     };
     useEffect(() => {
         const getData = async () => {
-            const payload ={
+            const payload = {
                 username: userData?.activeUser?.userName,
                 version: state?.version,
                 project: state?.name,
-                task: "object_detection",
+                task: "objectdetection",
             }
-            const res = await dispatch(ReturnDataSplit({payload, url}));
+            const res = await dispatch(ReturnDataSplit({ payload, url }));
             if (res?.status === 200) {
                 if (res?.payload?.data?.split_ratio) {
                     setTrainingPercentage((res?.payload?.data?.split_ratio) * 100 || 80)
@@ -50,15 +52,15 @@ function DataSplit({ onApply, userData, state, onChange, url }) {
                 username: userData?.activeUser?.userName,
                 version: state?.version,
                 project: state?.name,
-                task: "object_detection",
+                task: "objectdetection",
                 split_ratio: debouncedTrainingPercentage || 0.80
             }
-            dispatch(DataSplitImages({payload, url}));
+            dispatch(DataSplitImages({ payload, url }));
         }
     }, [debouncedTrainingPercentage, flag]);
 
     const saveHandler = () => {
-   
+
         if (hasChangedSteps?.dataSplit) {
             onChange()
         }
@@ -139,7 +141,7 @@ function DataSplit({ onApply, userData, state, onChange, url }) {
                                     </div>
                                 </div>
                             </div>
-                            <div className="row">
+                            {/* <div className="row">
                                 <div className="col-lg-6">
                                     <div className="DataPreviewAugment">
                                         <h6>Preview Images</h6>
@@ -174,7 +176,7 @@ function DataSplit({ onApply, userData, state, onChange, url }) {
                                         />}
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
                             <div className="row">
                                 <div className="col-lg-7 mx-auto">
                                     <div className="TwoButtons">

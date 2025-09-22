@@ -28,7 +28,7 @@ function DataSplit({ onApply, userData, state, onChange }) {
                 username: userData?.activeUser?.userName,
                 version: state?.version,
                 project: state?.name,
-                task: "object_detection",
+                task: "objectdetection",
             }));
             if (res?.status === 200) {
                 if (res?.payload?.data?.split_ratio) {
@@ -49,7 +49,7 @@ function DataSplit({ onApply, userData, state, onChange }) {
                 username: userData?.activeUser?.userName,
                 version: state?.version,
                 project: state?.name,
-                task: "object_detection",
+                task: "objectdetection",
                 split_ratio: debouncedTrainingPercentage || 0.80
             }));
         }

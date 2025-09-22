@@ -5,17 +5,20 @@ import { toast } from 'react-toastify';
 import { inferImages } from "../../reduxToolkit/Slices/projectSlices";
 import { useDispatch, useSelector } from "react-redux";
 import Slider from "rc-slider";
-import InferResultModal from "../Project/inferResultModal";
+import InferResultModal from "./InferResultModal";
 
 const initialstate = {
     conf: 0.5,
     onOpen: false,
-}
+};
 
-function InferImages({ userData, state, url }) {
+
+function InferImages({ userData, state, url, onApply, onChange }) {
     const [selectedFile, setSelectedFile] = useState(null);
-    const [istate, updateIstate] = useState(initialstate)
+    const [istate, updateIstate] = useState(initialstate);
     const [imagePreview, setImagePreview] = useState(null);
+    const [resultImage, setResultImage] = useState(null);
+    const [loading, setLoading] = useState(false);
     const { conf, onOpen } = istate;
     const dispatch = useDispatch();
 
@@ -39,39 +42,50 @@ function InferImages({ userData, state, url }) {
 
     const saveHandler = async () => {
         if (!selectedFile) {
-            toast.error("Please Select a Image to infer", commomObj)
-            return
+            toast.error("Please Select a Image to infer", commomObj);
+            return;
         }
+        setLoading(true);
         try {
             const formData = new FormData();
             formData.append("username", userData?.activeUser?.userName);
             formData.append("version", state?.version);
             formData.append("project", state?.name);
-            formData.append("task", "object_detection");
+            formData.append("task", "objectdetection");
             formData.append("file", selectedFile);
             formData.append("conf", conf);
 
-            const response = await dispatch(inferImages({ payload: formData, url }))
-            console.log(response, "response of import image")
-            if (response?.payload?.status === 201) {
-                toast.success(response?.payload?.data?.message, commomObj)
-                updateIstate({ ...istate, onOpen: true })
-            } else {
-                toast.error(response?.payload?.data?.message, commomObj)
-            }
-        } catch (error) {
-            toast.error("Oops,something went wrong", commomObj)
-            console.error("Error uploading file:", error);
+            // Use redux action to call API (returns axios response)
+            const response = await dispatch(inferImages({ payload: formData, url })).unwrap();
+            // If the response is a binary image, handle it
 
-        }
-    }
-    useEffect(() => {
-    return () => {
-        if (imagePreview) {
-            URL.revokeObjectURL(imagePreview);
+            // response.data is a Blob if axios is configured correctly, but if not, convert it
+            const imgUrl = URL.createObjectURL(response.data); // Blob
+            setResultImage(imgUrl);
+            updateIstate({ ...istate, onOpen: true });
+            toast.success("Inference successful", commomObj);
+
+        } catch (error) {
+            // Try to extract error message
+            let errorMsg = "Oops, something went wrong";
+            if (error && error.data && error.data.message) {
+                errorMsg = error.data.message;
+            } else if (error && error.message) {
+                errorMsg = error.message;
+            }
+            toast.error(errorMsg, commomObj);
+            console.error("Error uploading file:", error);
+        } finally {
+            setLoading(false);
         }
     };
-}, [imagePreview]);
+    useEffect(() => {
+        return () => {
+            if (imagePreview) {
+                URL.revokeObjectURL(imagePreview);
+            }
+        };
+    }, [imagePreview]);
     return (
         <>
             <div className="Small-Wrapper">
@@ -173,16 +187,18 @@ function InferImages({ userData, state, url }) {
                         <div className="row">
                             <div className="col-lg-7 mx-auto">
                                 <div className="TwoButtons">
-                                    <a className="OutlineBtn">
+                                    <button type="button" className="OutlineBtn">
                                         Cancel
-                                    </a>
-                                    <a
-                                        role="buton"
-                                        className="FillBtn"
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`FillBtn${loading ? ' disabled' : ''}`}
                                         onClick={saveHandler}
+                                        disabled={loading}
+                                        style={loading ? { pointerEvents: 'none', opacity: 0.6 } : {}}
                                     >
-                                        Start Inference
-                                    </a>
+                                        {loading ? 'Inferring...' : 'Start Inference'}
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -195,9 +211,12 @@ function InferImages({ userData, state, url }) {
                 setOutput={updateIstate}
                 userData={userData}
                 state={state}
+                onApply={onApply}
+                onChange={onChange}
                 selectedFile={selectedFile}
                 setSelectedFile={setSelectedFile}
                 url={url}
+                resultImage={resultImage}
             />
         </>
     )

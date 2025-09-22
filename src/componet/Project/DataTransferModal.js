@@ -11,14 +11,14 @@ import TrainingCompleted from './TrainingCompleted';
 import Papa from "papaparse";
 import { ClassStopDataTransfer } from '../../reduxToolkit/Slices/classificationSlices';
 
-const url = getUrl('classification')
+
 
 const initialstate = {
     openImage: false,
     trainingImage: "No image",
 }
 
-function DataTransferModal({ data, setData, apiresponse, setResponse, flag, setFlag, onApply, state, userData, task }) {
+function DataTransferModal({url, data, setData, apiresponse, setResponse, flag, setFlag, onApply, state, userData, task }) {
     const outputRef = useRef(null); 
     const rowsRef = useRef(null);
     const [dots, setDots] = useState('');
@@ -91,7 +91,7 @@ function DataTransferModal({ data, setData, apiresponse, setResponse, flag, setF
                         try {
                             const parsed = JSON.parse(line);
                             console.log('parsed data', parsed)
-                            if (task === "object_detection") {
+                            if (task === "objectdetection") {
                                 const parsedRow = {
                                     className: parsed.class_name || "Class < >",
                                     precision: (parseFloat(parsed.Precision) * 100).toFixed(2),
@@ -155,7 +155,7 @@ function DataTransferModal({ data, setData, apiresponse, setResponse, flag, setF
     //                 try {
     //                     const parsed = JSON.parse(line);
     //                     console.log('parsed data', parsed)
-    //                     if (task === "object_detection") {
+    //                     if (task === "objectdetection") {
     //                         const parsedRow = {
     //                             className: parsed.class_name || "Class < >",
     //                             precision: (parseFloat(parsed.Precision) * 100).toFixed(2),
@@ -194,22 +194,40 @@ function DataTransferModal({ data, setData, apiresponse, setResponse, flag, setF
             }
 
             const data = await response.json();
-            if (data.per_class_accuracy && Array.isArray(data.per_class_accuracy)) {
-                const parsedRows = data.per_class_accuracy.map(line => {
-                    // Example: "Class: hf | Accuracy: 100.00% | Total: 3 | Correct: 3"
-                    const classMatch = line.match(/Class:\s*([^\|]+)/);
-                    const accuracyMatch = line.match(/Accuracy:\s*([\d.]+)%/);
-                    return {
-                        Class: classMatch ? classMatch[1].trim() : '',
-                        Accuracy: accuracyMatch ? parseFloat(accuracyMatch[1]) : 0,
-                    };
-                });
-                setRows(parsedRows);
+            if (task === "classification") {
+                if (data.per_class_accuracy && Array.isArray(data.per_class_accuracy)) {
+                    const parsedRows = data.per_class_accuracy.map(line => {
+                        // Example: "Class: hf | Accuracy: 100.00% | Total: 3 | Correct: 3"
+                        const classMatch = line.match(/Class:\s*([^\|]+)/);
+                        const accuracyMatch = line.match(/Accuracy:\s*([\d.]+)%/);
+                        return {
+                            Class: classMatch ? classMatch[1].trim() : '',
+                            Accuracy: accuracyMatch ? parseFloat(accuracyMatch[1]) : 0,
+                        };
+                    });
+                    setRows(parsedRows);
+                } else {
+                    setRows([]);
+                }
+            } else if (task === "objectdetection") {
+                if (data.matrix && typeof data.matrix === 'object') {
+                    const parsedRows = Object.entries(data.matrix).map(([className, metrics]) => ({
+                        className,
+                        precision: metrics.P ? (parseFloat(metrics.P) * 100).toFixed(2) : '',
+                        recall: metrics.R ? (parseFloat(metrics.R) * 100).toFixed(2) : '',
+                        accuracy: metrics.Acc !== undefined ? (parseFloat(metrics.Acc)).toFixed(2) : '',
+                    }));
+                    setRows(parsedRows);
+                } else {
+                    setRows([]);
+                }
+            } else {
+                setRows([]);
             }
             setStatus(prev => ({ ...prev, loadingMatrix: false }));
         } catch (error) {
             setStatus(prev => ({ ...prev, loadingMatrix: false, errorMatrix: error.message || 'Error fetching validation matrix, try again after a few seconds' }));
-            console.error("Error parsing per_class_accuracy:", error);
+            console.error("Error parsing validation matrix:", error);
         }
     }
 
@@ -227,7 +245,7 @@ function DataTransferModal({ data, setData, apiresponse, setResponse, flag, setF
                 payload, url
             }))
             if (response?.payload?.image_base64 || response?.payload?.image) {
-                updateIstate({ ...istate, trainingImage: task == "classification" ? response?.payload?.image : response?.payload?.image_base64 })
+                updateIstate({ ...istate, trainingImage: response?.payload?.image  })
             } else {
                 updateIstate({ ...istate, trainingImage: "No image" })
             }
@@ -250,7 +268,7 @@ function DataTransferModal({ data, setData, apiresponse, setResponse, flag, setF
             formData.append("version", state?.version);
             formData.append("project", state?.name);
             formData.append("task", task);
-            const res = task == "object_detection" ? await dispatch(StopDataTransfer({ payload: formData, url })) :
+            const res = task == "objectdetection" ? await dispatch(StopDataTransfer({ payload: formData, url })) :
                 await dispatch(ClassStopDataTransfer({ payload: formData, url }))
             console.log(res, "response of StopDataTransfer")
             if (res?.payload?.status === 200) {
@@ -377,28 +395,35 @@ function DataTransferModal({ data, setData, apiresponse, setResponse, flag, setF
                                     </table>
                                 </div>
                                 <div className="ValidationTable" ref={rowsRef} >
-                                    <table >
+                                    <table>
                                         <tbody>
-                                            {rows?.length > 0 ? rows.map((row, index) => (
-
-                                                task === 'classification' ? <tr key={index}>
-
-                                                    <td >{row.Class}</td>
-                                                    <td >{row.Accuracy}%</td>
-
-                                                </tr> : <tr key={index}>
-                                                    <td style={{ minWidth: '92px' }}> {task == "object_detection" ? `class<${row.className}>` : ""}</td>
-                                                    <td style={{ minWidth: '92px' }}>{task == "object_detection" ? row.precision : ''}</td>
-                                                    <td style={{ minWidth: '92px' }}>{task == "object_detection" ? row.recall : ''}</td>
-                                                    <td style={{ minWidth: '92px' }}>{task == "object_detection" ? row.accuracy : ""}</td>
+                                            {rows?.length > 0 ? rows.map((row, index) => {
+                                                if (task === 'classification') {
+                                                    return (
+                                                        <tr key={index}>
+                                                            <td>{row.Class}</td>
+                                                            <td>{row.Accuracy}%</td>
+                                                        </tr>
+                                                    );
+                                                } else if (task === 'objectdetection') {
+                                                    return (
+                                                        <tr key={index}>
+                                                            <td style={{ minWidth: '92px' }}>{row.className}</td>
+                                                            <td style={{ minWidth: '92px' }}>{row.precision}</td>
+                                                            <td style={{ minWidth: '92px' }}>{row.recall}</td>
+                                                            <td style={{ minWidth: '92px' }}>{row.accuracy}</td>
+                                                        </tr>
+                                                    );
+                                                } else {
+                                                    return null;
+                                                }
+                                            }) : (
+                                                <tr>
+                                                    <td colSpan={task === 'objectdetection' ? 4 : 2} className='text-center'>
+                                                        <Loader />
+                                                    </td>
                                                 </tr>
-
-
-                                            )) : <tr>
-                                                {/* <td colspan="12" className='text-center'>
-                                                    Upcoming Update</td> */}
-                                                    <Loader />
-                                                    </tr>}
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>

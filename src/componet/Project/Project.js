@@ -26,7 +26,7 @@ function Project({ type }) {
                         <h4 className="NewTitle">Select Model</h4>
                     </div>}
                     <div className="row">
-                    {/* object detection */}
+                    {/* objectdetection */}
                         <div className="col-lg-6">
                             <div className="SelectModelBox">
                                 <aside>
@@ -68,7 +68,7 @@ function Project({ type }) {
                                     </ul>
                                     <Link
                                         className="StartTraining"
-                                        onClick={() => openModal("Object Detection")}
+                                        onClick={() => openModal("objectdetection")}
                                     >
                                         Create Project
                                     </Link>
@@ -76,21 +76,21 @@ function Project({ type }) {
                             </div>
                         </div>
 
-                        {/* Defect Detection */}
+                        {/* defectdetection */}
                         <div className="col-lg-6">
                             <div className="SelectModelBox">
                                 <aside>
                                     <ul>
                                         <li>
                                             <figure>
-                                                <img src={require("../../assets/images/defect-detection.webp")} />
+                                                <img src={require("../../assets/images/defectdetection.webp")} />
                                             </figure>
                                         </li>
                                        
                                     </ul>
                                 </aside>
-                                <h5>Defect Detection</h5>
-                                <p>Perform defect detection with limited labeling</p>
+                                <h5>defectdetection</h5>
+                                <p>Perform defectdetection with limited labeling</p>
                                 <article>
                                     <ul>
                                         <li>
@@ -120,7 +120,7 @@ function Project({ type }) {
                                     </ul>
                                     <Link
                                         className="StartTraining"
-                                        onClick={() => openModal("Defect Detection")}
+                                        onClick={() => openModal("defectdetection")}
                                     >
                                         Start Detection
                                     </Link>
@@ -191,7 +191,7 @@ function Project({ type }) {
                                     </ul>
                                 </aside>
                                 <h5>Text Extraction</h5>
-                                <p>Perform defect detection with limited labeling</p>
+                                <p>Perform defectdetection with limited labeling</p>
                                 <article>
                                     <ul>
                                         <li>

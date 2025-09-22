@@ -64,7 +64,7 @@ const stepsOrder = ['labelled', 'augumented', 'images', 'dataSplit', 'HyperTune'
                         <h2 className="NewTitle">
                             {state?.name} / <span>Version {state?.version}</span>
                         </h2>
-                        <h4 className="NewTitle">Model: Object Detection</h4>
+                        <h4 className="NewTitle">Model: objectdetection</h4>
                     </div>
                     <div className="StepBox">
                         <ul>

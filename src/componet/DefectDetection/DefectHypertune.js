@@ -11,7 +11,7 @@ import axios from 'axios';
 import Loader from '../../commonComponent/Loader';
 import { getUrl } from '../../config/config';
 
-const url = getUrl('defect-detection')
+const url = getUrl('defectdetection')
 
 const initialState = {
     model: "",
@@ -44,7 +44,7 @@ function DefectHypertune({ onApply, state, userData, onChange ,trainingStatus}) 
             username: userData?.activeUser?.userName,
             version: state?.version,
             project: state?.name,
-            task: "defect-detection",
+            task: "defectdetection",
         }));
         const fetchData = async () => {
             try {
@@ -55,9 +55,9 @@ function DefectHypertune({ onApply, state, userData, onChange ,trainingStatus}) 
                     username: userData?.activeUser?.userName,
                     version: state?.version,
                     project_name: state?.name,
-                    task: "defect-detection",
+                    task: "defectdetection",
                 }));
-                console.log(res, "response of defect-detection ")
+                console.log(res, "response of defectdetection ")
                 if (res?.payload?.status === 200) {
                     const data = res?.payload?.data
                     updateIstate((prev) => ({
@@ -100,7 +100,7 @@ function DefectHypertune({ onApply, state, userData, onChange ,trainingStatus}) 
     //=============================================save handler========================================
     const saveHandler = async () => {
         if (isDirty || hasChangedSteps?.HyperTune == false) {
-            const res = await axios.get(`${url}get_train_infer?username=${userData?.activeUser?.userName}&task=defect-detection&project_name=${state?.name}&version=${state?.version}`)
+            const res = await axios.get(`${url}get_train_infer?username=${userData?.activeUser?.userName}&task=defectdetection&project_name=${state?.name}&version=${state?.version}`)
             console.log(res, "response of training")
             if (res?.status === 200 && res?.data?.status != "training_completed") {
                 updateIstate({ ...istate, loader: false, openModal: true })
@@ -111,7 +111,7 @@ function DefectHypertune({ onApply, state, userData, onChange ,trainingStatus}) 
                 return;
             }
         }
-        const data = { username: userData?.activeUser?.userName, version: state?.version, project_name: state?.name, task: "defect-detection", model, image_size: Number(image_size) == 0 ? 256 : Number(image_size), model_size, test_split_mode, test_split: Number(test_split) == 0 ? 0.2 : Number(test_split), apply, tile_size: Number(tile_size) == 0 ? null : Number(tile_size), stride: Number(stride) == 0 ? null : Number(stride), use_random_tiling, random_tile_count: Number(random_tile_count) == 0 ? 16 : Number(random_tile_count), center_crop: Number(center_crop) == 0 ? 224 : Number(center_crop) }
+        const data = { username: userData?.activeUser?.userName, version: state?.version, project_name: state?.name, task: "defectdetection", model, image_size: Number(image_size) == 0 ? 256 : Number(image_size), model_size, test_split_mode, test_split: Number(test_split) == 0 ? 0.2 : Number(test_split), apply, tile_size: Number(tile_size) == 0 ? null : Number(tile_size), stride: Number(stride) == 0 ? null : Number(stride), use_random_tiling, random_tile_count: Number(random_tile_count) == 0 ? 16 : Number(random_tile_count), center_crop: Number(center_crop) == 0 ? 224 : Number(center_crop) }
         try {
             updateIstate({ ...istate, loader: true })
             const response = await dispatch(DefecthyperTune(data))
@@ -282,7 +282,7 @@ function DefectHypertune({ onApply, state, userData, onChange ,trainingStatus}) 
                                         <img
                                             src={require("../../assets/images/esclamination.png")}
                                             data-toggle="tooltip"
-                                            title="Train the dataset as a single class. Effective in defect detection (scratches, dents, etc) as defect"
+                                            title="Train the dataset as a single class. Effective in defectdetection (scratches, dents, etc) as defect"
                                         />
                                     </p>
                                     <div className="form-group">
@@ -433,7 +433,7 @@ function DefectHypertune({ onApply, state, userData, onChange ,trainingStatus}) 
                                         <img
                                             src={require("../../assets/images/esclamination.png")}
                                             data-toggle="tooltip"
-                                            title="Train the dataset as a single class. Effective in defect detection (scratches, dents, etc) as defect"
+                                            title="Train the dataset as a single class. Effective in defectdetection (scratches, dents, etc) as defect"
                                         />
                                     </p>
                                     <div className="form-group">
@@ -515,7 +515,7 @@ function DefectHypertune({ onApply, state, userData, onChange ,trainingStatus}) 
                 onApply={onApply}
                 userData={userData}
                 state={state}
-                task="defect-detection"
+                task="defectdetection"
                 apiPoint=""
             />
         </div>

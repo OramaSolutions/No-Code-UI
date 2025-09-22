@@ -14,7 +14,7 @@ import DefectRemark from './DefectRemark';
 import Application from './Application'
 import { useStepPersistence } from './useStepPersistence';
 
-const url = getUrl('defect-detection')
+const url = getUrl('defectdetection')
 console.log('url', url)
 
 function DefectTraining() {
@@ -33,7 +33,8 @@ function DefectTraining() {
     });
 
     const { state } = useLocation();
-    console.log('state', state )
+    const projectId = state.projectId
+    // console.log('state', state )
     const stepsOrder = ['labelled', 'HyperTune', 'infer', 'remark', 'application'];
 
     // Integrate useStepPersistence
@@ -141,7 +142,7 @@ function DefectTraining() {
                         <h2 className="NewTitle">
                             {state?.name} / <span>Version {state?.version}</span>
                         </h2>
-                        <h4 className="NewTitle">Model: Defect Detection</h4>
+                        <h4 className="NewTitle">Model: defectdetection</h4>
                     </div>
                     <div className="StepBox">
                         <ul>
@@ -225,7 +226,7 @@ function DefectTraining() {
                         state={state}
                         userData={userData}
                         username={userData?.activeUser?.userName}
-                        task="defect-detection"
+                        task="defectdetection"
                         project={state?.name}
                         version={state?.version}
                         onApply={() => handleApply('remark')}
@@ -238,7 +239,7 @@ function DefectTraining() {
                         state={state}
                         userData={userData}
                         username={userData?.activeUser?.userName}
-                        task="defect-detection"
+                        task="defectdetection"
                         project={state?.name}
                         version={state?.version}
                         onApply={() => handleApply('application')}

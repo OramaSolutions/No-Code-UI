@@ -17,7 +17,7 @@ function CreateVersion({ show, setShow, model }) {
     const { openVersion, projectName } = show;
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const redirect = model == "Object Detection" ? "/training" : model == "Classification" ? "/classification-training" : "/detection-training"
+    const redirect = model == "objectdetection" ? "/training" : model == "Classification" ? "/classification-training" : "/detection-training"
 
     const handleclose = () => {
         setShow({ ...show, openVersion: false })

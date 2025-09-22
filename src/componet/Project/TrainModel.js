@@ -16,19 +16,15 @@ const initialstate = {
     defectTrainData: {}
 }
 
-
+// train_yolov8
 function TrainModel({ initialData, setState, onApply, userData, state, task, apiPoint }) {
     const [istate, updateIstate] = useState(initialstate)
     const { opentrainModal, opentraincomplete, opendefectTraining, isTrainDataLoaded, openVisualize, defectTrainData } = istate;
     const [output, setOutput] = useState("")
     const [flag, setFlag] = useState(false)
     console.log(task)
-    let url = ''
-    if (task === "object_detection") {
-        url = getUrl("object-detection")
-    } else {
-        url = getUrl(task)
-    }
+    let url = getUrl(task)
+   
 
     const handleOpen = async () => {
         try {
@@ -72,11 +68,11 @@ function TrainModel({ initialData, setState, onApply, userData, state, task, api
                     console.log("Polling success: Flag set");
                     return; // Stop polling
                 } else {
-                    setTimeout(poll, 1000); // Retry after 1s
+                    setTimeout(poll, 10000); // Retry after 1s
                 }
             } catch (err) {
                 console.error("Polling error:", err);
-                setTimeout(poll, 1000); // Retry even on error
+                setTimeout(poll, 10000); // Retry even on error
             }
         };
 
@@ -115,7 +111,7 @@ function TrainModel({ initialData, setState, onApply, userData, state, task, api
                                 </figure>
                             </div>
                         </div>
-                        <a className="Button FolderPermissionId" onClick={task == "defect-detection" ? handleDefect : handleOpen}>Train Model</a>
+                        <a className="Button FolderPermissionId" onClick={task == "defectdetection" ? handleDefect : handleOpen}>Train Model</a>
                     </div>
 
                 </Modal.Body>
@@ -132,6 +128,7 @@ function TrainModel({ initialData, setState, onApply, userData, state, task, api
                 userData={userData}
                 state={state}
                 task={task}
+                url={url}
             />
             {opendefectTraining && <DefectTrainModal
                 data={istate}

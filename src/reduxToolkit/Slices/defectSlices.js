@@ -5,7 +5,7 @@ import { isLoggedIn } from "../../utils";
 
 import {getUrl } from '../../config/config';
 
-const url = getUrl('defect-detection')
+const url = getUrl('defectdetection')
 
 const initialState = {
     defectModal: [],

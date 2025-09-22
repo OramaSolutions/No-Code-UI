@@ -3,22 +3,23 @@ import { useState } from 'react';
 import axios from 'axios';
 import { getUrl } from '../../config/config';
 
-const url = getUrl('defectdetection');
+const url = getUrl('objectdetection');
 
-const stepsOrder = ['labelled', 'HyperTune', 'infer', 'remark', 'application'];
+const stepsOrder = ['labelled', 'augumented', 'images', 'dataSplit', 'HyperTune', 'infer', 'remark', 'application'];
 export const useStepPersistence = (userData, projectState) => {
   const [stepStatus, setStepStatus] = useState({});
   const [currentStep, setCurrentStep] = useState('labelled');
   const [isLoading, setIsLoading] = useState(true);
   const token = userData?.token || '';
+  console.log('Project State in OD:', projectState);
   const fetchProjectStatus = async () => {
     try {
       setIsLoading(true);
       const response = await axios.get(`${url}status`, {
         params: {
-          projectId: projectState?.projectId,
           username: userData?.activeUser?.userName,
-          task: 'defectdetection',
+          projectId: projectState?.projectId,
+          task: 'objectdetection',
           project_name: projectState?.name,
           version: projectState?.version
         },
@@ -58,9 +59,9 @@ export const useStepPersistence = (userData, projectState) => {
       await axios.post(`${url}update_step_status`,
         {
           username: userData?.activeUser?.userName,
-          project_name: projectState?.name,
           projectId: projectState?.projectId,
-          task: 'defectdetection',
+          project_name: projectState?.name,
+          task: 'objectdetection',
           version: projectState?.version,
           step: stepName,
           status,

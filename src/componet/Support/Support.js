@@ -180,10 +180,10 @@ function Support() {
                                         onChange={inputHandler}
                                     >
                                         <option value="">---Select--- </option>
-                                        <option value="Object Detection">Object Detection </option>
-                                        <option value="Defect Detection">Defect Detection</option>
+                                        <option value="objectdetection">Object Detection </option>
+                                        <option value="defectdetection">defectdetection</option>
                                         <option value="Classification">Classification </option>
-                                        <option value="Defect Detection">Defect Detection</option>
+                                        <option value="defectdetection">defectdetection</option>
                                     </select>
                                     <span style={{ color: 'red' }} >{error.modelError}</span>
                                 </div>

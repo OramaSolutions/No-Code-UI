@@ -19,9 +19,9 @@ const applications = [
   },
   {
     id: 3,
-    title: "Defect Detection System",
+    title: "defectdetection System",
     description:
-      "Automates real-time defect detection in the production line, reducing errors and improving throughput in critical manufacturing systems.",
+      "Automates real-time defectdetection in the production line, reducing errors and improving throughput in critical manufacturing systems.",
     image: "https://via.placeholder.com/400x250.png?text=Defect+Detection",
   },
 ];

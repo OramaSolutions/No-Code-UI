@@ -22,7 +22,7 @@ const initialState = {
 
 function ProjectTraining() {
     const dispatch = useDispatch();
-    const [iState, updateIstate] = useState("remark");
+    const [iState, updateIstate] = useState("labelled");
     const userData = JSON.parse(window.localStorage.getItem("userLogin"))
     const { hasChangedSteps } = useSelector((state) => state.steps);
     const [completedSteps, setCompletedSteps] = useState({

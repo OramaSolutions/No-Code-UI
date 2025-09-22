@@ -15,8 +15,8 @@ function OpenProjectModal({ istate, setIstate }) {
     const navigate = useNavigate()
     const [Istate, updateIstate] = useState(initialState)
     const { versionNumber } = Istate;
-    const { openModal, projectName, projectId,model} = istate;
-    console.log(model,"model testing")
+    const { openModal, projectName, projectId, model } = istate;
+
     const { versionData, loader } = useSelector((state) => state.openProject)
     const [error, setError] = useState(false)
 
@@ -40,10 +40,11 @@ function OpenProjectModal({ istate, setIstate }) {
                 const res = await dispatch(projectOpen(data))
                 console.log(res, "<<<<res")
                 if (res?.payload?.code === 200) {
-                    const redirect=model=="objectdetection"?"/training":model=="Classification"?"/classification-training":"/detection-training"
-                    navigate(redirect, { state: { name: projectName, version: versionNumber, projectId: projectId } })                   
-                    setIstate({ ...istate, openModal: false,projectId:"" })
-                    updateIstate({...Istate,versionNumber:""})
+                    const projectData = res?.payload?.askedProject
+                    const redirect = model == "objectdetection" ? "/training" : model == "Classification" ? "/classification-training" : "/detection-training"
+                    navigate(redirect, { state: { name: projectData?.name, version: projectData?.versionNumber, projectId: projectData?._id } })
+                    setIstate({ ...istate, openModal: false, projectId: "" })
+                    updateIstate({ ...Istate, versionNumber: "" })
                 } else {
                     toast.error(res?.payload?.message, commomObj)
                 }

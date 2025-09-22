@@ -29,7 +29,7 @@ function Labelled({ iState, updateIstate, userData, state, onApply,onChange, url
     const [selectedFile, setSelectedFile] = useState(null);
     const abortControllerReff = useRef();
     const dispatch = useDispatch();
-    console.log('url', url)
+    // console.log('url', url)
 
     useEffect(() => {
         const fetchAndSaveStreamingZip = async () => {

@@ -106,7 +106,7 @@ const fetchStatus = async (id, persistedOverride) => {
         username: persisted.username,
         projectId: persisted.projectId,
         task: persisted.task,
-        name: persisted.project, // if API expects 'name' [web:60]
+        name: persisted.project, 
         version: persisted.version,
       },
       { headers: { Authorization: `Bearer ${token}` } }

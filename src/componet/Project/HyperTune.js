@@ -39,7 +39,7 @@ function HyperTune({onApply,state,userData,onChange }) {
             username: userData?.activeUser?.userName,
             version: state?.version,
             project:state?.name,
-            task: "object_detection",
+            task: "objectdetection",
         }));
         const fetchData = async () => {
             try {
@@ -47,7 +47,7 @@ function HyperTune({onApply,state,userData,onChange }) {
                     username: userData?.activeUser?.userName,
                     version: state?.version,
                     project: state?.name,
-                    task: "object_detection",
+                    task: "objectdetection",
                 }));
               if(res?.payload?.status===200){
                 updateIstate((prev)=>({...prev,                     
@@ -95,7 +95,7 @@ function HyperTune({onApply,state,userData,onChange }) {
         formData.append("username",userData?.activeUser?.userName);
         formData.append("version",state?.version);
         formData.append("project", state?.name);
-        formData.append("task", "object_detection");
+        formData.append("task", "objectdetection");
         formData.append("pre_trained_model", pre_trained_model);
         formData.append("batch", batch||"12");
         formData.append("epochs", epochs||"100");
@@ -341,7 +341,7 @@ function HyperTune({onApply,state,userData,onChange }) {
                                         <img
                                             src={require("../../assets/images/esclamination.png")}
                                             data-toggle="tooltip"
-                                            title="Train the dataset as a single class. Effective in defect detection (scratches, dents, etc) as defect"
+                                            title="Train the dataset as a single class. Effective in defectdetection (scratches, dents, etc) as defect"
                                         />
                                     </p>
                                     <div className="form-group">
@@ -509,7 +509,7 @@ function HyperTune({onApply,state,userData,onChange }) {
              onApply={onApply}
              userData={userData}
              state={state}
-             task="object_detection"
+             task="objectdetection"
              apiPoint="train_yolov8"
             />
         </>

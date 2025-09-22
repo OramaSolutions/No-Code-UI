@@ -12,7 +12,7 @@ import axios from 'axios';
 import { getUrl } from '../../config/config';
 import DefectRemark from './DefectRemark';
 import Application from './Application'
-const url = getUrl('defect-detection')
+const url = getUrl('defectdetection')
 console.log('url', url)
 function DefectTraining() {
     const dispatch = useDispatch();
@@ -33,7 +33,7 @@ function DefectTraining() {
     useEffect(() => {
         const fetchStatus = async () => {
             try {
-                const res = await axios.get(`${url}status?username=${userData?.activeUser?.userName}&task=defect-detection&project_name=${state?.name}&version=${state?.version}`)
+                const res = await axios.get(`${url}status?username=${userData?.activeUser?.userName}&task=defectdetection&project_name=${state?.name}&version=${state?.version}`)
                 console.log(res, "response for opening the step in defect", "HELLO")
                 if (res?.status === 200) {
                     if (res?.data?.status == "training_completed_successfully") {
@@ -85,7 +85,7 @@ function DefectTraining() {
                         <h2 className="NewTitle">
                             {state?.name} / <span>Version {state?.version}</span>
                         </h2>
-                        <h4 className="NewTitle">Model: Defect Detection</h4>
+                        <h4 className="NewTitle">Model: defectdetection</h4>
                     </div>
                     <div className="StepBox">
                         <ul>
@@ -162,7 +162,7 @@ function DefectTraining() {
                         state={state}
                         userData={userData}
                         username={userData?.activeUser?.userName}
-                        task="defect-detection"
+                        task="defectdetection"
                         project={state?.name}
                         version={state?.version}
                         onApply={() => handleApply('remark')}

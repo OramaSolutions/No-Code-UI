@@ -21,7 +21,7 @@ function AugumentImages({ iState, onApply, userData, state, onChange }) {
                     username: userData?.activeUser?.userName,
                     version: state?.version,
                     project: state?.name,
-                    task: "object_detection",
+                    task: "objectdetection",
                 }));
                 console.log(res, "agumenation images")
                 if (res?.payload?.code === 200 && res?.payload?.images) {
@@ -54,7 +54,7 @@ function AugumentImages({ iState, onApply, userData, state, onChange }) {
                 username: userData?.activeUser?.userName,
                 version: state?.version,
                 project: state?.name,
-                task: "object_detection",
+                task: "objectdetection",
             }));
             if (res?.payload?.code === 200 && res?.payload?.images) {
                 console.log(res?.payload?.images, "res?.payload?.data")

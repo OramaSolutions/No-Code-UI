@@ -39,7 +39,7 @@ export const importData = createAsyncThunk('project/importData', async ({ payloa
       },
       signal: signal,
     });
-    // console.log('response.....', response)
+    console.log('response.....', response)
     // console.log(response, "response................")
     if (response.status === 201) {
       console.log(response.data, "response.data")
@@ -74,7 +74,7 @@ export const AugumentedData = createAsyncThunk('project/augumentation', async ({
   }
 })
 //==========================================Data Split===============================================
-export const DataSplits = createAsyncThunk('project/datasplit', async ({payload, url}, { rejectWithValue }) => {
+export const DataSplits = createAsyncThunk('project/datasplit', async ({ payload, url }, { rejectWithValue }) => {
   try {
     const response = await axios.post(`${url}split_data`, payload, {
       headers: {
@@ -93,7 +93,7 @@ export const DataSplits = createAsyncThunk('project/datasplit', async ({payload,
   }
 })
 //==========================================Hyper Tune=================================================
-export const hyperTune = createAsyncThunk('project/hypertune', async ({payload, url}, { rejectWithValue }) => {
+export const hyperTune = createAsyncThunk('project/hypertune', async ({ payload, url }, { rejectWithValue }) => {
   try {
     const response = await axios.post(`${url}tune_hyperparameter`, payload, {
       headers: {
@@ -112,7 +112,7 @@ export const hyperTune = createAsyncThunk('project/hypertune', async ({payload, 
   }
 })
 //============================================augumented images preview==================================
-export const AgumentedImage = createAsyncThunk('project/agumentedImage', async ({payload, url}, { rejectWithValue }) => {
+export const AgumentedImage = createAsyncThunk('project/agumentedImage', async ({ payload, url }, { rejectWithValue }) => {
   try {
     const response = await axios.get(`${url}preview_images?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
     );
@@ -128,7 +128,7 @@ export const AgumentedImage = createAsyncThunk('project/agumentedImage', async (
   }
 })
 //==============================================agumented generated images============================
-export const AgumentedGeneratedImage = createAsyncThunk('project/agumentedgeneratedImage', async ({payload, url}, { rejectWithValue }) => {
+export const AgumentedGeneratedImage = createAsyncThunk('project/agumentedgeneratedImage', async ({ payload, url }, { rejectWithValue }) => {
   try {
     const response = await axios.get(`${url}view_generated_images?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
     );
@@ -144,7 +144,7 @@ export const AgumentedGeneratedImage = createAsyncThunk('project/agumentedgenera
   }
 })
 //====================================Pre-trained-model(hyper tune)=====================================
-export const HypetTuneModal = createAsyncThunk('project/hypertunemodel', async ({payload, url}, { rejectWithValue }) => {
+export const HypetTuneModal = createAsyncThunk('project/hypertunemodel', async ({ payload, url }, { rejectWithValue }) => {
   try {
     const response = await axios.get(`${url}models_download?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
     );
@@ -160,7 +160,7 @@ export const HypetTuneModal = createAsyncThunk('project/hypertunemodel', async (
   }
 })
 //============================================Data split Prevuew Images======================================
-export const DataSplitImages = createAsyncThunk('project/datasplitimages', async ({payload, url}, { rejectWithValue }) => {
+export const DataSplitImages = createAsyncThunk('project/datasplitimages', async ({ payload, url }, { rejectWithValue }) => {
   try {
 
     const response = await axios.get(`${url}split_data?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}&split_ratio=${payload?.split_ratio}`
@@ -177,7 +177,7 @@ export const DataSplitImages = createAsyncThunk('project/datasplitimages', async
   }
 })
 //======================================Data Transfer response==========================================
-export const DataTransfer = createAsyncThunk('project/datatransfer', async ({payload, url}, { rejectWithValue, dispatch }) => {
+export const DataTransfer = createAsyncThunk('project/datatransfer', async ({ payload, url }, { rejectWithValue, dispatch }) => {
   try {
     const response = await axios({
       method: 'get',
@@ -222,7 +222,7 @@ export const DataTransfer = createAsyncThunk('project/datatransfer', async ({pay
   }
 })
 //===================================training batch api==============================================
-export const TrainingbatchApi = createAsyncThunk('project/Trainingbatch', async ({payload, url}, { rejectWithValue }) => {
+export const TrainingbatchApi = createAsyncThunk('project/Trainingbatch', async ({ payload, url }, { rejectWithValue }) => {
   try {
     const newPoint = payload?.task == "classification" ? "training_batches_cls" : "training_batches"
     const response = await axios.get(`${url}${newPoint}?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
@@ -239,26 +239,47 @@ export const TrainingbatchApi = createAsyncThunk('project/Trainingbatch', async 
   }
 })
 //===============================================infer images============================================
-export const inferImages = createAsyncThunk('project/inferimages', async ({payload, url}, { rejectWithValue }) => {
-  try {
-    const response = await axios.post(`${url}import_image`, payload, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    console.log(response, "response................")
-    if (response.status === 201) {
-      return response;
-    } else {
-      return rejectWithValue(response);
+export const inferImages = createAsyncThunk('project/inferimages', async ({ payload, url }, { rejectWithValue }) => {
+  // try {
+  //   const response = await axios.post(`${url}infer_image`, payload, {
+  //     headers: {
+  //       "Content-Type": "multipart/form-data",
+  //     },
+  //   });
+  //   console.log(response, "response................")
+  //   if (response.status === 201) {
+  //     return response;
+  //   } else {
+  //     return rejectWithValue(response);
+  //   }
+  // }
+  // catch (err) {
+  //   return rejectWithValue(err.response);
+  // }
+
+
+  const res = await axios.post(`${url}infer_image`, payload, {
+    headers: { "Content-Type": "multipart/form-data" },
+    responseType: 'blob',
+    validateStatus: () => true,
+  });
+
+  if (res.status >= 200 && res.status < 300) {
+    return res;
+  } else {
+    // Try parse JSON error from blob
+    try {
+      const text = await res.data.text();
+      const err = JSON.parse(text || '{}');
+      return (err.message || 'Inference failed');
+    } catch {
+      return ('Inference failed');
     }
   }
-  catch (err) {
-    return rejectWithValue(err.response);
-  }
 })
+
 //=============================================data Transfer stop api==================================
-export const StopDataTransfer = createAsyncThunk('project/StopDataTransfer', async ({payload, url}, { rejectWithValue }) => {
+export const StopDataTransfer = createAsyncThunk('project/StopDataTransfer', async ({ payload, url }, { rejectWithValue }) => {
   try {
     const response = await axios.post(`${url}stop`, payload, {
       headers: {
@@ -315,7 +336,7 @@ export const checkProject = createAsyncThunk('project/checkproject', async (payl
 })
 
 //=============================================remark data================================================
-export const remarkData = createAsyncThunk('project/remarkdata', async ({payload, url}, { rejectWithValue }) => {
+export const remarkData = createAsyncThunk('project/remarkdata', async ({ payload, url }, { rejectWithValue }) => {
   try {
     const token = isLoggedIn("userLogin");
     const response = await axios.post(`${url}remark`, payload, {
@@ -356,7 +377,7 @@ export const getRemarkData = createAsyncThunk('project/getRemarkData', async ({ 
 })
 
 //====================================return agumentation==========================================
-export const ReturnAgumentation = createAsyncThunk('project/Returnagumentation', async ({payload, url}, { rejectWithValue }) => {
+export const ReturnAgumentation = createAsyncThunk('project/Returnagumentation', async ({ payload, url }, { rejectWithValue }) => {
   try {
     const response = await axios.get(`${url}return_augmentations?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
     );
@@ -372,7 +393,7 @@ export const ReturnAgumentation = createAsyncThunk('project/Returnagumentation',
   }
 })
 //================================return data splitt=====================================================
-export const ReturnDataSplit = createAsyncThunk('project/ReturnDataSplit', async ({payload, url}, { rejectWithValue }) => {
+export const ReturnDataSplit = createAsyncThunk('project/ReturnDataSplit', async ({ payload, url }, { rejectWithValue }) => {
   try {
     const response = await axios.get(`${url}return_split_ratio?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
     );
@@ -388,7 +409,7 @@ export const ReturnDataSplit = createAsyncThunk('project/ReturnDataSplit', async
   }
 })
 //================================return hyper tune======================================================
-export const ReturnHypertune = createAsyncThunk('project/ReturnHypertune', async ({payload, url}, { rejectWithValue }) => {
+export const ReturnHypertune = createAsyncThunk('project/ReturnHypertune', async ({ payload, url }, { rejectWithValue }) => {
   try {
     const response = await axios.get(`${url}return_tune_hyperparameter?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
     );
@@ -408,7 +429,7 @@ const initialState = {
   agumentedImages: [],
   agumentedGeneratedImages: [],
   hypertuneModel: [],
-  datasplitImages: [],
+  totalImages: 0,
   dataTransferResult: "",
   loading: false,
 }
@@ -459,7 +480,7 @@ const projectSlice = createSlice({
       })
       .addCase(DataSplitImages.fulfilled, (state, action) => {
         state.loading = false;
-        state.datasplitImages = action.payload;
+        state.totalImages = action.payload.total_images;
       })
       .addCase(DataSplitImages.rejected, (state, action) => {
         state.loading = false;

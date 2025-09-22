@@ -34,7 +34,7 @@ function Labelled({ iState, updateIstate, userData, state, onApply,onChange, url
     useEffect(() => {
         const fetchAndSaveStreamingZip = async () => {
             try {
-                const response = await fetch(`${url}return_import_dataset?username=${userData?.activeUser?.userName}&task=object_detection&project=${state?.name}&version=${state?.version}`, {
+                const response = await fetch(`${url}return_import_dataset?username=${userData?.activeUser?.userName}&task=objectdetection&project=${state?.name}&version=${state?.version}`, {
                     method: 'GET',
                 });
                 console.log(response, "responseeee")
@@ -115,7 +115,7 @@ function Labelled({ iState, updateIstate, userData, state, onApply,onChange, url
         formData.append("version", state?.version);
         formData.append("project", state?.name);
         formData.append("width", width);
-        formData.append("task", "object_detection");
+        formData.append("task", "objectdetection");
         try {
             abortControllerReff.current = new AbortController();
             setIstate({ ...istate, open: true });
@@ -153,7 +153,7 @@ function Labelled({ iState, updateIstate, userData, state, onApply,onChange, url
                 Size: imageUrls.length,
                 image: imageUrls?.[0]
             }
-            window.localStorage.setItem("DataSize", JSON.stringify(datasize))
+            // window.localStorage.setItem("DataSize", JSON.stringify(datasize))
             onApply()
             return;
         }
@@ -166,7 +166,7 @@ function Labelled({ iState, updateIstate, userData, state, onApply,onChange, url
         formData.append("username", userData?.activeUser?.userName);
         formData.append("version", state?.version);
         formData.append("project", state?.name);
-        formData.append("task", "object_detection");
+        formData.append("task", "objectdetection");
         try {
             abortControllerReff.current = new AbortController();
             setIstate({ ...istate, openImport: true })
@@ -176,11 +176,11 @@ function Labelled({ iState, updateIstate, userData, state, onApply,onChange, url
             if (response?.payload?.status === 201) {
                 setIstate({ ...istate, openImport: false })
                 toast.success("Import Successfully", commomObj)
-                const datasize = {
-                    Size: imageUrls.length,
-                    image: imageUrls?.[0]
-                }
-                window.localStorage.setItem("DataSize", JSON.stringify(datasize))
+                // const datasize = {
+                //     Size: imageUrls.length,
+                //     image: imageUrls?.[0]
+                // }
+                // window.localStorage.setItem("DataSize", JSON.stringify(datasize))
                 onChange();
                 onApply()
 
@@ -347,7 +347,7 @@ function Labelled({ iState, updateIstate, userData, state, onApply,onChange, url
                 handleCancel={handleCancel}
                 userData={userData}
                 state={state}
-                task="object_detection"
+                task="objectdetection"
                 url={url}
             />
             <ImportModal

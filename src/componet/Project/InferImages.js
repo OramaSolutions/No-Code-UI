@@ -45,7 +45,7 @@ function InferImages({ userData, state }) {
             formData.append("username", userData?.activeUser?.userName);
             formData.append("version", state?.version);
             formData.append("project", state?.name);
-            formData.append("task", "object_detection");
+            formData.append("task", "objectdetection");
             formData.append("file", selectedFile);
             formData.append("conf", conf);
 

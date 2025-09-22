@@ -11,7 +11,7 @@ const initialState = {
     numOfTries: "",
     loading: false,
 }
-const url = getUrl('defect-detection')
+const url = getUrl('defectdetection')
 
                       
 const DefectRemark = ({iState,username, task,project, version,onApply ,onChange}) => {

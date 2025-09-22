@@ -38,8 +38,9 @@ function OpenProjectModal({ istate, setIstate }) {
             try {
                 const data = { name: projectName, versionNumber }
                 const res = await dispatch(projectOpen(data))
+                console.log(res, "<<<<res")
                 if (res?.payload?.code === 200) {
-                    const redirect=model=="Object Detection"?"/training":model=="Classification"?"/classification-training":"/detection-training"
+                    const redirect=model=="objectdetection"?"/training":model=="Classification"?"/classification-training":"/detection-training"
                     navigate(redirect, { state: { name: projectName, version: versionNumber, projectId: projectId } })                   
                     setIstate({ ...istate, openModal: false,projectId:"" })
                     updateIstate({...Istate,versionNumber:""})

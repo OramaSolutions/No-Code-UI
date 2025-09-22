@@ -19,7 +19,7 @@ const Dashboard = () => {
         dispatch(dashboardList())
     }, [])
     const navigateHandler = (projectName, versionNumber, projectId,model) => {
-        const redirect=model=="Object Detection"?"/training":model=="Classification"?"/classification-training":"/detection-training"
+        const redirect=model=="objectdetection"?"/training":model=="Classification"?"/classification-training":"/detection-training"
         navigate(redirect, { state: { name: projectName, version: versionNumber, projectId: projectId } })
     }
     return (

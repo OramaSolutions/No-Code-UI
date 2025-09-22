@@ -10,7 +10,7 @@ import ImportModal from "../Project/ImportModal";
 import { ClassResizeFolder, importClassData } from "../../reduxToolkit/Slices/classificationSlices";
 import {  getUrl } from '../../config/config';
 
-const url = getUrl('defect-detection')
+const url = getUrl('defectdetection')
 
 
 const initialState = {
@@ -33,7 +33,7 @@ function Defectlabelled({ iState, updateIstate, userData, state, onApply, onChan
     useEffect(() => {
         const fetchAndSaveStreamingZip = async () => {
             try {
-                const response = await fetch(`${url}get_import_dataset?username=${userData?.activeUser?.userName}&task=defect-detection&project_name=${state?.name}&version=${state?.version}`, {
+                const response = await fetch(`${url}get_import_dataset?username=${userData?.activeUser?.userName}&task=defectdetection&project_name=${state?.name}&version=${state?.version}`, {
                     method: 'GET',
                 });
                 console.log(response, "responseeee")
@@ -111,7 +111,7 @@ function Defectlabelled({ iState, updateIstate, userData, state, onApply, onChan
         formData.append("username", userData?.activeUser?.userName);
         formData.append("version", state?.version);
         formData.append("project_name", state?.name);
-        formData.append("task", "defect-detection");
+        formData.append("task", "defectdetection");
 
         try {
             abortControllerReff.current = new AbortController();

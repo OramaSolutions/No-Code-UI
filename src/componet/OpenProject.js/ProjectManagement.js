@@ -114,6 +114,7 @@ function ProjectManagement() {
     }
     //======================================open project modal===========================================
     const openUpdateModal = (projectname,id,model) => {
+        console.log('clicked>>>>',projectname,id,model)
         setIstate({ ...istate, openModal:true,projectName:projectname,projectId:id,model:model })
     }
     return (

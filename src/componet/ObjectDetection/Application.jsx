@@ -183,6 +183,7 @@ const handleDownload = async (appTitle) => {
   setError(null);
 
   try {
+    console.log('token', token)
     const response = await axios.post(
       `${url}build-image-pri`,
       { username, projectId, task, project, version },

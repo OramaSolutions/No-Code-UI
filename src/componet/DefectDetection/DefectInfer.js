@@ -14,7 +14,7 @@ import DefectTrainModal from "./DefectTrainModal";
 import DefectVisualize from "./DefectVisualize";
 import { getUrl } from '../../config/config';
 
-const url = getUrl('defect-detection')
+const url = getUrl('defectdetection')
 
 const initialstate = {
     onOpen: false,
@@ -35,7 +35,7 @@ function DefectInfer({ userData, state, onApply, onChange }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get(`${url}get_confidence?username=${userData?.activeUser?.userName}&task=defect-detection&project_name=${state?.name}&version=${state?.version}`)
+                const res = await axios.get(`${url}get_confidence?username=${userData?.activeUser?.userName}&task=defectdetection&project_name=${state?.name}&version=${state?.version}`)
                 console.log(res, "response of infer confidence")
                 if (res?.status == 200) {
                     updateIstate({ ...istate, confidence: (res?.data?.confidence).toFixed(2) || 0 })
@@ -76,7 +76,7 @@ function DefectInfer({ userData, state, onApply, onChange }) {
             formData.append("username", userData?.activeUser?.userName);
             formData.append("version", state?.version);
             formData.append("project_name", state?.name);
-            formData.append("task", "defect-detection");
+            formData.append("task", "defectdetection");
             formData.append("image", selectedFile);
             formData.append("confidence", confidence);
 
@@ -222,7 +222,7 @@ function DefectInfer({ userData, state, onApply, onChange }) {
                 onApply={onApply}
                 userData={userData}
                 state={state}
-                task="defect-detection"
+                task="defectdetection"
                 type="infer"
             />}
             {openVisualize && <DefectVisualize
@@ -231,7 +231,7 @@ function DefectInfer({ userData, state, onApply, onChange }) {
                 onApply={onApply}
                 userData={userData}
                 state={state}
-                task="defect-detection"
+                task="defectdetection"
                 type="infer"
             />}
         </div>

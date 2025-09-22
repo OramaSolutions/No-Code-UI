@@ -31,6 +31,7 @@ function HyperTune({onApply,state,userData,onChange, url }) {
     const [istate, updateIstate] = useState(initialState)
     const {openModal, vaidation_conf, loader, advanced, mosaic, pre_trained_model, imgsz, batch, epochs, close_mosaic, device, dropout, fliplr, flipud, patience, single_class,isDirty } = istate;
     const { hypertuneModel} = useSelector((state) => state.project)
+    console.log('hypertuneModel', hypertuneModel)
     const { hasChangedSteps } = useSelector((state) => state.steps);
     console.log(istate, "istate")
     //==========================================pre-trained model============================================
@@ -39,16 +40,17 @@ function HyperTune({onApply,state,userData,onChange, url }) {
             username: userData?.activeUser?.userName,
             version: state?.version,
             project:state?.name,
-            task: "object_detection",
+            task: "objectdetection",
         }
         dispatch(HypetTuneModal({payload, url}));
+
         const fetchData = async () => {
             try {
                 const payload = {
                     username: userData?.activeUser?.userName,
                     version: state?.version,
                     project: state?.name,
-                    task: "object_detection",
+                    task: "objectdetection",
                 }
                 const res = await dispatch(ReturnHypertune({payload, url}));
               if(res?.payload?.status===200){
@@ -97,7 +99,7 @@ function HyperTune({onApply,state,userData,onChange, url }) {
         formData.append("username",userData?.activeUser?.userName);
         formData.append("version",state?.version);
         formData.append("project", state?.name);
-        formData.append("task", "object_detection");
+        formData.append("task", "objectdetection");
         formData.append("pre_trained_model", pre_trained_model);
         formData.append("batch", batch||"12");
         formData.append("epochs", epochs||"100");
@@ -343,7 +345,7 @@ function HyperTune({onApply,state,userData,onChange, url }) {
                                         <img
                                             src={require("../../assets/images/esclamination.png")}
                                             data-toggle="tooltip"
-                                            title="Train the dataset as a single class. Effective in defect detection (scratches, dents, etc) as defect"
+                                            title="Train the dataset as a single class. Effective in Defect Detection (scratches, dents, etc) as defect"
                                         />
                                     </p>
                                     <div className="form-group">
@@ -511,7 +513,7 @@ function HyperTune({onApply,state,userData,onChange, url }) {
              onApply={onApply}
              userData={userData}
              state={state}
-             task="object_detection"
+             task="objectdetection"
              apiPoint="train_yolov8"
             />
         </>

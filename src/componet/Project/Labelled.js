@@ -36,7 +36,7 @@ function Labelled({ iState, updateIstate, userData, state, onApply,onChange }) {
     useEffect(() => {
         const fetchAndSaveStreamingZip = async () => {
             try {
-                const response = await fetch(`${Url2}return_import_dataset?username=${userData?.activeUser?.userName}&task=object_detection&project=${state?.name}&version=${state?.version}`, {
+                const response = await fetch(`${Url2}return_import_dataset?username=${userData?.activeUser?.userName}&task=objectdetection&project=${state?.name}&version=${state?.version}`, {
                     method: 'GET',
                 });
                 console.log(response, "responseeee")
@@ -117,7 +117,7 @@ function Labelled({ iState, updateIstate, userData, state, onApply,onChange }) {
         formData.append("version", state?.version);
         formData.append("project", state?.name);
         formData.append("width", width);
-        formData.append("task", "object_detection");
+        formData.append("task", "objectdetection");
         try {
             abortControllerReff.current = new AbortController();
             setIstate({ ...istate, open: true });
@@ -168,7 +168,7 @@ function Labelled({ iState, updateIstate, userData, state, onApply,onChange }) {
         formData.append("username", userData?.activeUser?.userName);
         formData.append("version", state?.version);
         formData.append("project", state?.name);
-        formData.append("task", "object_detection");
+        formData.append("task", "objectdetection");
         try {
             abortControllerReff.current = new AbortController();
             setIstate({ ...istate, openImport: true })
@@ -349,7 +349,7 @@ function Labelled({ iState, updateIstate, userData, state, onApply,onChange }) {
                 handleCancel={handleCancel}
                 userData={userData}
                 state={state}
-                task="object_detection"
+                task="objectdetection"
             />
             <ImportModal
                 onOpen={openImport}

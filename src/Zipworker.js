@@ -35,7 +35,7 @@ self.onmessage = async function (event) {
       );
     }
   });
-//=====using if else condition for defect detection as we have to show both folder images instead of a single folder as we have shown in object and classification=====
+//=====using if else condition for defectdetection as we have to show both folder images instead of a single folder as we have shown in object and classification=====
 const results = await Promise.all(filePromises);
 let imageUrls = [];
   if (showAll) {   

@@ -21,9 +21,9 @@ const[show,setShow]=useState(initialState)
 const [error, setError] = useState(false);
 const{password,confirmPassword,loading,eye1,eye2}=show;
 
-console.log("check the token")
+// console.log("check the token")
 const token=location?.search?.split("?")[1]
-console.log(token,"tokennnnnnnnnnn")
+// console.log(token,"tokennnnnnnnnnn")
 
 //=========================================input handler=====================================================
    const inputHandler = (e) => {
@@ -39,7 +39,7 @@ console.log(token,"tokennnnnnnnnnn")
     try {
         const data = { token:token, password: password.trim() };
         const res = await dispatch(SetPassword(data))
-        console.log(res,"ressssssss")
+        // console.log(res,"ressssssss")
         if (res?.payload?.code === 200) {
             toast.success(res.payload.message, commomObj)
             navigate("/loginSuccess") 
@@ -52,7 +52,7 @@ console.log(token,"tokennnnnnnnnnn")
     }
     catch (err) {
         toast.error(err?.payload?.message, commomObj)
-        console.log("erttttrdesfg", err)
+        // console.log("erttttrdesfg", err)
     }
 }
 

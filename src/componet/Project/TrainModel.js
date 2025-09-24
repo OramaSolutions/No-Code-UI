@@ -22,62 +22,42 @@ function TrainModel({ initialData, setState, onApply, userData, state, task, api
     const { opentrainModal, opentraincomplete, opendefectTraining, isTrainDataLoaded, openVisualize, defectTrainData } = istate;
     const [output, setOutput] = useState("")
     const [flag, setFlag] = useState(false)
+    const [taskId, setTaskId] = useState(null)
+    // pollStatus and setPollStatus removed; handled in DataTransferModal
     console.log(task)
     let url = getUrl(task)
-   
+
+
 
     const handleOpen = async () => {
         try {
-            updateIstate({ ...istate, opentrainModal: true })
+            updateIstate({ ...istate, opentrainModal: true });
             handleclose();
-            pollUntilImageExists();
+            // DataTransferModal will handle polling
             const response = await fetch(`${url}${apiPoint}?username=${userData?.activeUser?.userName}&task=${task}&project=${state?.name}&version=${state?.version}`, {
                 method: 'GET',
             });
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder('utf-8');
-
-
-
-
-
-            let result;
-            while (!(result = await reader.read()).done) {
-                const chunk = decoder.decode(result.value, { stream: true });
-                setOutput(prevOup => prevOup + chunk)
+            const data = await response.json();
+            console.log('Response received:', data);
+            if(data.message === 'Training already completed.'){
+                updateIstate(prev => ({ ...prev, opentraincomplete: true, opentrainModal: true }));
             }
-            // console.log('checked stream complete one closes')
-            updateIstate({ ...istate, opentraincomplete: true, opentrainModal: true, })
+
+            const tId = data.task_id;
+            console.log('Task ID:', tId);
+            setTaskId(tId);
+            // DataTransferModal will handle polling
         } catch (error) {
             console.error('Error fetching stream:', error);
         }
     };
 
-    const pollUntilImageExists = async () => {
-        const pollUrl = `${url}train_batch_img_get?username=${userData?.activeUser?.userName}&task=${task}&project=${state?.name}&version=${state?.version}`;
-        console.log('calling ', pollUrl)
-        const poll = async () => {
-            try {
-                const res = await fetch(pollUrl);
-                const data = await res.json();
-                if (data.status === 'ok') {
-                    setFlag(prev => !prev);  // ✅ set flag here
-                    console.log("Polling success: Flag set");
-                    return; // Stop polling
-                } else {
-                    setTimeout(poll, 10000); // Retry after 1s
-                }
-            } catch (err) {
-                console.error("Polling error:", err);
-                setTimeout(poll, 10000); // Retry even on error
-            }
-        };
 
-        poll();
-    };
+    // pollTrainingStatus and pollUntilImageExists moved to DataTransferModal
 
 
     const handleclose = () => {
@@ -129,6 +109,7 @@ function TrainModel({ initialData, setState, onApply, userData, state, task, api
                 state={state}
                 task={task}
                 url={url}
+                taskId={taskId}
             />
             {opendefectTraining && <DefectTrainModal
                 data={istate}

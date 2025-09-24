@@ -16,7 +16,7 @@ function Header() {
     const { openModal, sellerData } = istate;
     const profileimage = JSON.parse(window.localStorage.getItem("sellerimage"))
     const sellerLogin = JSON.parse(window.localStorage.getItem("userLogin"))
-    console.log(notificationData, "notificationData")
+    // console.log(notificationData, "notificationData")
 
     const openLogoutModal = () => {
         updateIstate({ ...istate, openModal: true })

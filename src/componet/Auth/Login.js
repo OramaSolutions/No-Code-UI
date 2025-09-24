@@ -19,7 +19,7 @@ const initialState = {
 const Login = () => {
     const [show, setShow] = useState(initialState)
     const { email, password, loading, errors,modal } = show;
-    console.log(show, 'showwwww')
+    // console.log(show, 'showwwww')
     const dispatch = useDispatch()
     const navigate = useNavigate();
 //=========================================input handler=====================================================
@@ -35,7 +35,7 @@ const Login = () => {
             try {              
                 const data = {userName: email.trim(), password: password.trim() };
                 const res = await dispatch(userLogin(data))
-                console.log(res, "ressssssss")
+                // console.log(res, "ressssssss")
                 if (res?.payload?.code === 200) {
                     if(!res?.payload?.is_login){
                         setShow({...show,modal:true})
@@ -52,7 +52,7 @@ const Login = () => {
             }
             catch (err) {
                 toast.error(err?.payload?.message, commomObj)
-                console.log("erttttrdesfg", err)
+                // console.log("erttttrdesfg", err)
             }
         }
 

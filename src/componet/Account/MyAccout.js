@@ -21,7 +21,7 @@ function MyAccout() {
     const dispatch = useDispatch();
     const navigate=useNavigate();
     const { profileData, loader } = useSelector((state) => state.auth)
-    console.log(profileData, "profileData")
+    // console.log(profileData, "profileData")
     const [istate, updateIstate] = useState(initialState)
     const { name, email, contact, errors, loading, profilePic } = istate;
     const userData = JSON.parse(window.localStorage.getItem("userLogin"))
@@ -79,7 +79,7 @@ function MyAccout() {
                     toast.error("Oops!something went wrong", commomObj);
                 }
             } catch (err) {
-                console.log(err, "errrrrrrrr")
+                // console.log(err, "errrrrrrrr")
             }
         }
 
@@ -87,7 +87,7 @@ function MyAccout() {
     //========================================file handler======================================
     const onFileHandler = async (e) => {
         const file = e.target.files[0];
-        console.log({ file })
+        // console.log({ file })
         if (file) {
             if (file.type === "image/jpeg" ||
                 file.type === "image/jpg" || file.type === "image/png" 

@@ -50,7 +50,7 @@ function Classagumentation({ initial, setIstate, state, userData, onApply, onCha
     const { openModal, onClose, cropProb, cropVal, rotation, crop, verticalFlip, horizontalFlip, brightness, contrast, stauration, noise, blur, rotate_limit, rotate_prob, vertical_flip_prob, horizontal_flip_prob, brightness_limit, brightness_prob, contrast_limit, contrast_prob, hue_saturation_limit, hue_saturation_prob, gauss_noise_var_limit, gauss_noise_prob, blur_limit, blur_prob, num_of_images_to_be_generated, isDirty } = iState
     const abortControllerReff = useRef();
     const dispatch = useDispatch()
-    console.log(hasChangedSteps, "hasChangedSteps Agumentation")
+    // console.log(hasChangedSteps, "hasChangedSteps Agumentation")
 
     useEffect(() => {
         const fetchData = async () => {
@@ -113,7 +113,7 @@ function Classagumentation({ initial, setIstate, state, userData, onApply, onCha
         }
     }
     const inputHandler = (value, name) => {
-        console.log('val and name', value, name)
+        // console.log('val and name', value, name)
         updateIstate({ ...iState, [name]: value, isDirty: false })
     }
     const saveHandler = async () => {
@@ -212,7 +212,7 @@ function Classagumentation({ initial, setIstate, state, userData, onApply, onCha
     const handleCancel = () => {
         if (abortControllerReff?.current) {
             abortControllerReff?.current?.abort();
-            console.log('agumentation operation aborted');
+            // console.log('agumentation operation aborted');
         }
     };
     return (

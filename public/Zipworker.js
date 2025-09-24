@@ -71,7 +71,7 @@ self.onmessage = async function (event) {
   zipContents.forEach((relativePath, zipEntry) => {
     if (imagesQueued >= maxImages) return; // Don't process more than 10 images
     if (zipEntry.dir) return; // Skip directories
-    console.log(imagesQueued, "imagesQueued")
+    // console.log(imagesQueued, "imagesQueued")
     const pathParts = relativePath.split('/');
     const folderName = pathParts.length > 1 ? pathParts[0] : '';
     const isImage = /\.(jpg|jpeg|png|bmp)$/i.test(relativePath);

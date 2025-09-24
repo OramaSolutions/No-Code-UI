@@ -66,7 +66,7 @@ function ChangePassword() {
                     })
                 }
             } catch (err) {
-                console.log(err, 'qwertyui')
+                // console.log(err, 'qwertyui')
 
             }
 

@@ -11,7 +11,7 @@ import useDebounce from './Debouncing';
 
 function DataSplit({ onApply, userData, state, onChange, url }) {
     const dispatch = useDispatch()
-    // const AgumentedSize = window.localStorage.getItem("AgumentedSize") || 0
+    const AgumentedSize = window.localStorage.getItem("AgumentedSize") || 0
     const [trainingPercentage, setTrainingPercentage] = useState(80);
     const [flag, setFlag] = useState(false)
     const debouncedTrainingPercentage = useDebounce((trainingPercentage / 100).toFixed(2), 300);
@@ -19,7 +19,7 @@ function DataSplit({ onApply, userData, state, onChange, url }) {
     const { hasChangedSteps } = useSelector((state) => state.steps);
     console.log(hasChangedSteps, "datasplitImages")
 
-    const AgumentedSize = useSelector((state) => state.project.totalImages);
+    // const AgumentedSize = useSelector((state) => state.project.totalImages);
     
     const handleSliderChange = (value) => {
         setTrainingPercentage(value);

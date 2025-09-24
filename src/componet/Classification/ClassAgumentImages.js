@@ -12,7 +12,7 @@ function ClassAgumentImages({iState,onApply ,userData,state}) {
     const { agumentedImages,agumentedGeneratedImages, loading } = useSelector((state) => state.project)
     const[loader,setLoader]=useState(true)
     const [blobUrls, setBlobUrls] = useState([]);
-    console.log(agumentedGeneratedImages, loading, "agumentedImages")
+    // console.log(agumentedGeneratedImages, loading, "agumentedImages")
 
 //==========================================view preview images===========================================
     useEffect(() => {
@@ -26,7 +26,7 @@ function ClassAgumentImages({iState,onApply ,userData,state}) {
             }  
             const res = await dispatch(AgumentedImage({payload, url}));                 
             if (res?.payload?.code === 200 && res?.payload?.images) {
-                console.log(res?.payload?.images, "res?.payload?.data")
+                // console.log(res?.payload?.images, "res?.payload?.data")
                 const binaryString = res?.payload?.images                            
                 const extractedImages = binaryString?.map(img => base64ToImageUrl(img.image));               
                 setBlobUrls(extractedImages);
@@ -37,7 +37,7 @@ function ClassAgumentImages({iState,onApply ,userData,state}) {
             }
         }catch(err){
             toast.error("Oops! Something went wrong", commomObj)
-          console.log(err,"errr")
+        //   console.log(err,"errr")
           setLoader(false)
         }
     }
@@ -60,7 +60,7 @@ const generatedImages=async()=>{
         }
         const res = await dispatch(AgumentedGeneratedImage({payload, url}));           
         if (res?.payload?.code === 200 && res?.payload?.images) {
-            console.log(res?.payload?.images, "res?.payload?.data")
+            // console.log(res?.payload?.images, "res?.payload?.data")
             const binaryString = res?.payload?.images                            
             const extractedImages = binaryString?.map(img => base64ToImageUrl(img.image));               
             setBlobUrls(extractedImages);
@@ -71,7 +71,7 @@ const generatedImages=async()=>{
         }
     }catch(err){
         toast.error("Oops! Something went wrong", commomObj)
-      console.log(err,"errr")
+    //   console.log(err,"errr")
       setLoader(false)
     }
 

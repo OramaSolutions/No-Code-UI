@@ -3,30 +3,30 @@ import axios from 'axios';
 
 
 export function isLoggedIn(userType) {
-    let session = getObject(userType) || {};
-    session = Object.keys(session).length && JSON.parse(session)
-    let accessToken = (session?.token) || "";
-    return accessToken;
+  let session = getObject(userType) || {};
+  session = Object.keys(session).length && JSON.parse(session)
+  let accessToken = (session?.token) || "";
+  return accessToken;
+}
+
+
+export function getObject(key) {
+  if (window && window.localStorage) {
+    return window.localStorage.getItem(key);
   }
-  
-  
-  export function getObject(key) {
-    if (window && window.localStorage) {
-        return window.localStorage.getItem(key);
-    }
-  }
-  //=============================================toast object=========================================================
-  export const commomObj = {
-    position: "top-right",
-    autoClose: 3000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "light",
-    transition:Bounce,
-} 
+}
+//=============================================toast object=========================================================
+export const commomObj = {
+  position: "top-right",
+  autoClose: 3000,
+  hideProgressBar: false,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: true,
+  progress: undefined,
+  theme: "light",
+  transition: Bounce,
+}
 //========================================date handler====================================================================
 export const handledate = (str) => {
   let data = str?.split("T");
@@ -52,7 +52,7 @@ export const detectMimeType = (binaryString) => {
 //===================================api cancel functionality==============================================================
 
 export const makeCancelableRequest = async (apiCall, payload, rejectWithValue, signal) => {
-    try {
+  try {
     const response = await apiCall(payload, signal);
     if (response.status === 200) {
       return response.data;

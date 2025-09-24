@@ -47,6 +47,7 @@ const initialState = {
 function Augumentation({ initial, setIstate, state, userData, onApply, onChange, url }) {
     const { hasChangedSteps } = useSelector((state) => state.steps);
     const DatasetSize = JSON.parse(window.localStorage.getItem("DataSize")) || {}
+    console.log('dataset size')
     const [iState, updateIstate] = useState(initialState)
     const { openModal, onClose, cropProb, cropX, cropY, rotation, crop, verticalFlip, horizontalFlip, brightness, contrast, stauration, noise, blur, rotate_limit, rotate_prob, vertical_flip_prob, horizontal_flip_prob, brightness_limit, brightness_prob, contrast_limit, contrast_prob, hue_saturation_limit, hue_saturation_prob, gauss_noise_var_limit, gauss_noise_prob, blur_limit, blur_prob, num_of_images_to_be_generated, isDirty } = iState
     console.log(iState, "istateeeeee")
@@ -114,7 +115,7 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
                     project: state?.name,
                     version: state?.version
                 });
-                const response = await fetch(`${url}/return_sample_for_aug?${params.toString()}`);
+                const response = await fetch(`${url}return_sample_for_aug?${params.toString()}`);
                 if (response.ok) {
                     const blob = await response.blob();
                     setSampleImageUrl(URL.createObjectURL(blob));

@@ -103,7 +103,7 @@ function ClassHyperTune({ onApply, state, userData, onChange }) {
                     }))
                 }
             } catch (err) {
-                console.log(err, "err hypertune")
+                // console.log(err, "err hypertune")
             }
         }
         fetchData();

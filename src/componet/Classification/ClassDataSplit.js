@@ -37,7 +37,7 @@ function ClassDataSplit({ onApply, userData, state }) {
             const res = await dispatch(ReturnClassDataSplit({
                 payload, url
             }));
-            console.log(res, "return response of data split")
+            // console.log(res, "return response of data split")
             if (res?.payload?.status === 200) {
                 if (res?.payload?.data?.split_ratio) {
                     setTrainingPercentage((res?.payload?.data?.split_ratio) * 100 || 80)

@@ -14,7 +14,7 @@ const Forgot = () => {
     const [show, setShow] = useState(initialstate)
     const { email, loading } = show;
     const [error, setError] = useState(false)
-    console.log(show, 'showwwww')
+    // console.log(show, 'showwwww')/
     const dispatch = useDispatch()
     const navigate = useNavigate();
 
@@ -33,7 +33,7 @@ const Forgot = () => {
             try {
                 const data = { email: email.trim() };
                 const res = await dispatch(sendEmail(data))
-                console.log(res, "ressssssss")
+                // console.log(res, "ressssssss")
                 if (res?.payload?.code === 200) {
                     navigate('/loginVerification');
                     toast.success("Email sent Successfully", commomObj)
@@ -47,7 +47,7 @@ const Forgot = () => {
             }
             catch (err) {
                 toast.error(err?.payload?.message, commomObj)
-                console.log("erttttrdesfg", err)
+                // console.log("erttttrdesfg", err)
             }
         }
 

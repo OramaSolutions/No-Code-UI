@@ -8,8 +8,8 @@ const token = isLoggedIn("userLogin");
 const applications = [
   {
     id: 1,
-    title: "Single Camera AI defectdetection System",
-    description: "AI-powered defectdetection and assembly verification using a single camera vision system. Ensures precise assembly quality and reduces manual inspection effort.",
+    title: "Single Camera AI assembly verification System",
+    description: "AI-powered object detection and assembly verification using a single camera vision system. Ensures precise assembly quality and reduces manual inspection effort.",
     image: "https://via.placeholder.com/400x250.png?text=Camera+Verification",
   },
 ];

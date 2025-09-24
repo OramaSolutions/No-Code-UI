@@ -4,7 +4,7 @@ import { useDropzone } from "react-dropzone";
 import axios from 'axios';
 import { commomObj } from '../../utils';
 import Loader from '../../commonComponent/Loader';
-import { useDispatch,useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ResizeFolder, importData } from "../../reduxToolkit/Slices/projectSlices";
 import ResizeModal from "./ResizeModal";
 import ImportModal from "../Project/ImportModal";
@@ -22,7 +22,7 @@ const initialState = {
     closeImport: false,
 }
 
-function Labelled({ iState, updateIstate, userData, state, onApply,onChange, url }) {
+function Labelled({ iState, updateIstate, userData, state, onApply, onChange, url }) {
     const [istate, setIstate] = useState(initialState)
     const { imageUrls, imageFolder, loading, resizecheck, width, open, close, openImport, closeImport } = istate;
     const [isDirty, setIsDirty] = useState("")
@@ -37,10 +37,16 @@ function Labelled({ iState, updateIstate, userData, state, onApply,onChange, url
                 const response = await fetch(`${url}return_import_dataset?username=${userData?.activeUser?.userName}&task=objectdetection&project=${state?.name}&version=${state?.version}`, {
                     method: 'GET',
                 });
-                console.log(response, "responseeee")
+                console.log("responseeee",response)
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                const datasize = {
+                    Size: response,
+
+                }
+                console.log('setting dataset size', imageUrls.length)
+                window.localStorage.setItem("DataSize", JSON.stringify(datasize))
 
                 const filename = response.headers.get('x-filename') || 'default_filename.zip';
                 const reader = response.body.getReader();
@@ -151,9 +157,11 @@ function Labelled({ iState, updateIstate, userData, state, onApply,onChange, url
         if (isDirty == selectedFile.name) {
             const datasize = {
                 Size: imageUrls.length,
-                image: imageUrls?.[0]
+
             }
-            // window.localStorage.setItem("DataSize", JSON.stringify(datasize))
+            console.log('setting dataset size', imageUrls.length)
+            window.localStorage.setItem("DataSize", JSON.stringify(datasize))
+            console.log('not changed so returning')
             onApply()
             return;
         }
@@ -170,17 +178,20 @@ function Labelled({ iState, updateIstate, userData, state, onApply,onChange, url
         try {
             abortControllerReff.current = new AbortController();
             setIstate({ ...istate, openImport: true })
-            // console.log("formData in training >>", formData);
-            const response = await dispatch(importData({ payload:formData, signal: abortControllerReff.current.signal, url }))
+            console.log("formData in import >>");
+            console.log([...formData.entries()]);
+            const response = await dispatch(importData({ payload: formData, signal: abortControllerReff.current.signal, url }))
             console.log("File response>>>>>", response);
             if (response?.payload?.status === 201) {
                 setIstate({ ...istate, openImport: false })
                 toast.success("Import Successfully", commomObj)
-                // const datasize = {
-                //     Size: imageUrls.length,
-                //     image: imageUrls?.[0]
-                // }
-                // window.localStorage.setItem("DataSize", JSON.stringify(datasize))
+                const datasize = {
+                    Size: response?.payload?.data?.image_count,
+
+                }
+                console.log('setting dataset size', imageUrls.length)
+                window.localStorage.setItem("DataSize", JSON.stringify(datasize))
+                console.log('data size set')
                 onChange();
                 onApply()
 

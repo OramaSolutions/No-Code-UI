@@ -14,7 +14,7 @@ self.onmessage = async function (event) {
     if (zipEntry.dir) {
       return; // Skip directories
     }
-    console.log(relativePath, "zipEntry.dir")
+    // console.log(relativePath, "zipEntry.dir")
     const pathParts = relativePath.split('/');
     const folderName = pathParts.length > 1 ? pathParts[0] : '';
 

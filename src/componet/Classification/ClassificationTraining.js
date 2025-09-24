@@ -29,7 +29,7 @@ function ClassificationTraining() {
     //     remark: false
     // });
     const userName = userData?.activeUser.userName || "anon";
-    console.log('username', userName, userData)
+    // console.log('username', userName, userData)
     const LOCAL_KEY = state
         ? `cls_steps_${userName}_${state.name}_${state.version}`
         : `cls_steps_${userName}`;

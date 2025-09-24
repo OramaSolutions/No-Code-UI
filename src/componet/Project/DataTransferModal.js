@@ -10,7 +10,7 @@ import { commomObj } from '../../utils';
 import TrainingCompleted from './TrainingCompleted';
 import Papa from "papaparse";
 import { ClassStopDataTransfer } from '../../reduxToolkit/Slices/classificationSlices';
-
+import { FaSpinner } from "react-icons/fa";
 
 
 const initialstate = {
@@ -18,8 +18,69 @@ const initialstate = {
     trainingImage: "No image",
 }
 
-function DataTransferModal({url, data, setData, apiresponse, setResponse, flag, setFlag, onApply, state, userData, task }) {
-    const outputRef = useRef(null); 
+function DataTransferModal({ url, data, setData, apiresponse, setResponse, flag, setFlag, onApply, state, userData, task, taskId }) {
+    // Polling state for training status
+    const [pollStatus, setPollStatus] = useState({ status: '', progress: '', result: '', error: '' });
+    // Track if polling is active
+    const [pollingActive, setPollingActive] = useState(false);
+    // Poll for training status when modal opens and taskId is available
+    useEffect(() => {
+        if (data.opentrainModal && taskId && !pollingActive) {
+            setPollingActive(true);
+            pollTrainingStatus(taskId);
+            pollUntilImageExists();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [data.opentrainModal, taskId]);
+
+    // Polling logic for training status
+    const pollTrainingStatus = async (tId) => {
+        const pollUrl = `${url}training_status/${tId}`;
+        const poll = async () => {
+            try {
+                const res = await fetch(pollUrl);
+                const dataRes = await res.json();
+                if (res.status) {
+                    setPollStatus({
+                        status: dataRes.status || '',
+                        progress: dataRes.progress || '',
+                        result: dataRes.result || '',
+                        error: dataRes.error || ''
+                    });
+                    if (dataRes.progress === 'Training completed successfully') {
+                        setData(prev => ({ ...prev, opentraincomplete: true, opentrainModal: true }));
+                        setPollingActive(false);
+                        return; // Stop polling
+                    }
+                }
+                setTimeout(poll, 10000);
+            } catch (err) {
+                setTimeout(poll, 10000);
+            }
+        };
+        poll();
+    };
+
+    // Polling logic for image existence
+    const pollUntilImageExists = async () => {
+        const pollUrl = `${url}train_batch_img_get?username=${userData?.activeUser?.userName}&task=${task}&project=${state?.name}&version=${state?.version}`;
+        const poll = async () => {
+            try {
+                const res = await fetch(pollUrl);
+                const dataRes = await res.json();
+                if (dataRes.status === 'ok') {
+                    setFlag(prev => !prev);
+                    return;
+                } else {
+                    setTimeout(poll, 10000);
+                }
+            } catch (err) {
+                setTimeout(poll, 10000);
+            }
+        };
+        poll();
+    };
+    const outputRef = useRef(null);
     const rowsRef = useRef(null);
     const [dots, setDots] = useState('');
     const dispatch = useDispatch()
@@ -43,13 +104,10 @@ function DataTransferModal({url, data, setData, apiresponse, setResponse, flag, 
         return () => clearInterval(interval);
     }, []);
 
-    useEffect(() => {
-        console.log('data', data)
-        console.log('flag', flag)
-    }, [data])
+
 
     const handleclose = () => {
-        console.log('ran handle close')
+
         setData({ ...data, opentrainModal: false })
         setResponse("")
         setFlag(false)
@@ -62,126 +120,16 @@ function DataTransferModal({url, data, setData, apiresponse, setResponse, flag, 
 
     useEffect(() => {
 
-        const fetchdata = async () => {
-            try {
-                let apiendpoint = task === "classification" ? "val_matrix_cls" : "val_matrix";
-                const response = await fetch(`${url}${apiendpoint}?username=${userData?.activeUser?.userName}&task=${task}&project=${state?.name}&version=${state?.version}`);
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder('utf-8');
-                let buffer = '';
-
-                while (true) {
-                    const { value, done } = await reader.read();
-                    if (done) break;
-
-                    buffer += decoder.decode(value, { stream: true });
-                    let lines = buffer.split('\n');
-
-                    // Hold back the last partial line for the next chunk
-                    buffer = lines.pop();
-
-                    for (let line of lines) {
-                        if (line.trim() === '') continue;
-
-                        try {
-                            const parsed = JSON.parse(line);
-                            console.log('parsed data', parsed)
-                            if (task === "objectdetection") {
-                                const parsedRow = {
-                                    className: parsed.class_name || "Class < >",
-                                    precision: (parseFloat(parsed.Precision) * 100).toFixed(2),
-                                    recall: (parseFloat(parsed.Recall) * 100).toFixed(2),
-                                    accuracy: (parseFloat(parsed.F1) * 100).toFixed(2),
-                                };
-                                setRows(prev => [...prev, parsedRow]);
-                            } else if (task === "classification") {
-                                const parsedRow = {
-                                    epoch: parsed.epoch,
-                                    top1: (parseFloat(parsed.top1) * 100).toFixed(2),
-                                    top5: (parseFloat(parsed.top5) * 100).toFixed(2),
-                                };
-                                console.log('parsedRow', parsedRow)
-                                setRows(prev => [...prev, parsedRow]);
-                            }
-                        } catch (err) {
-                            console.error("Invalid JSON line in NDJSON stream", err);
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error("Error fetching validation matrix:", error);
-            }
-        };
 
 
         if (flag) {
-            // fetchdata();
-            // fetchImage();
+
             setShowButtons(true)
         }
     }, [flag])
 
-    // const fetchdata = async () => {
-    //     try {
-    //         let apiendpoint = task === "classification" ? "val_matrix_cls" : "val_matrix";
-    //         const response = await fetch(`${Url2}${apiendpoint}?username=${userData?.activeUser?.userName}&task=${task}&project=${state?.name}&version=${state?.version}`);
-
-    //         if (!response.ok) {
-    //             throw new Error(`HTTP error! status: ${response.status}`);
-    //         }
-
-    //         const reader = response.body.getReader();
-    //         const decoder = new TextDecoder('utf-8');
-    //         let buffer = '';
-
-    //         while (true) {
-    //             const { value, done } = await reader.read();
-    //             if (done) break;
-
-    //             buffer += decoder.decode(value, { stream: true });
-    //             let lines = buffer.split('\n');
-
-    //             // Hold back the last partial line for the next chunk
-    //             buffer = lines.pop();
-
-    //             for (let line of lines) {
-    //                 if (line.trim() === '') continue;
-
-    //                 try {
-    //                     const parsed = JSON.parse(line);
-    //                     console.log('parsed data', parsed)
-    //                     if (task === "objectdetection") {
-    //                         const parsedRow = {
-    //                             className: parsed.class_name || "Class < >",
-    //                             precision: (parseFloat(parsed.Precision) * 100).toFixed(2),
-    //                             recall: (parseFloat(parsed.Recall) * 100).toFixed(2),
-    //                             accuracy: (parseFloat(parsed.F1) * 100).toFixed(2),
-    //                         };
-    //                         setRows(prev => [...prev, parsedRow]);
-    //                     } else if (task === "classification") {
-
-    //                         const parsedRow = {
-    //                             Class: parsed.Class,
-    //                             Accuracy: (parseFloat(parsed.Accuracy)),
-
-    //                         };
-    //                         console.log('parsedRow', parsedRow)
-    //                         setRows(prev => [...prev, parsedRow]);
-    //                     }
-    //                 } catch (err) {
-    //                     console.error("Invalid JSON line in NDJSON stream", err);
-    //                 }
-    //             }
-    //         }
-    //     } catch (error) {
-    //         console.error("Error fetching validation matrix:", error);
-    //     }
-    // };
+    
 
     const fetchData = async () => {
         setStatus(prev => ({ ...prev, loadingMatrix: true, errorMatrix: '' }));
@@ -245,7 +193,7 @@ function DataTransferModal({url, data, setData, apiresponse, setResponse, flag, 
                 payload, url
             }))
             if (response?.payload?.image_base64 || response?.payload?.image) {
-                updateIstate({ ...istate, trainingImage: response?.payload?.image  })
+                updateIstate({ ...istate, trainingImage: response?.payload?.image })
             } else {
                 updateIstate({ ...istate, trainingImage: "No image" })
             }
@@ -295,11 +243,18 @@ function DataTransferModal({url, data, setData, apiresponse, setResponse, flag, 
     const handleProceed = () => {
         console.log('ran handle proceeed')
         setData({ ...data, opentraincomplete: false, opentrainModal: false });
+        console.log('>>>1 set data')
+        
         setResponse("");
+        console.log('>>>2 set response')
         setFlag(false);
+        console.log('>>>3 set flag')
         onApply();
+        console.log('>>>>>>4 on apply')
+        setPollStatus({ status: '', progress: '', result: '', error: '' })
+        setPollingActive(false)
     };
-
+    const inProgress = !data?.opentraincomplete;
     return (
         <>
             <Modal
@@ -309,16 +264,62 @@ function DataTransferModal({url, data, setData, apiresponse, setResponse, flag, 
                 <Modal.Body>
 
                     <div className="relative pb-0">
-                        <div className="ProjectAlreadyArea">
-                            <h5>{!data.opentraincomplete ? 'Training in progress' : 'Training Complete'}</h5>
-                            {!data.opentraincomplete && <Loader
-                                Visible={true}
-                            />}
-                            {!data.opentraincomplete ? <h6>Please be patient, it may take some time</h6> : null}
-                            <button className='mb-4 bg-black px-3 py-1 text-white rounded' onClick={() => { setShowTerminal(!showTerminal) }}>{showTerminal ? 'Hide Terminal ↓' : 'Show Terminal ↓'} </button>
-                            {showTerminal && <div className='BlackCodeArea' ref={outputRef} style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                                <pre style={{ textAlign: "left", lineHeight: 1.6, color: "white", whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>{apiresponse ? apiresponse : `Loading${dots}`}</pre>
-                            </div>}
+                        <div className="w-full rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-2 shadow-sm">
+                            <div className="flex  justify-center ">
+                                <div className='flex gap-4'>
+                                    {inProgress ? (
+                                        <FaSpinner className="animate-spin text-blue-800 mt-0.5" />
+                                    ) : (
+                                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-emerald-500 mt-0.5">
+                                            <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
+                                    )}
+
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <h5 className="text-base font-semibold text-gray-900">
+                                                {inProgress ? "Training in progress..." : "Training complete"}
+                                            </h5>
+                                        </div>
+                                        {inProgress && (
+                                            <p className="text-sm text-gray-600 mt-1">
+                                                Please be patient, this may take some time.
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {inProgress && pollStatus && (
+                                <div className="mt-2 rounded-lg bg-white p-4 shadow-xs border border-gray-100">
+                                    <div className="grid grid-cols-3 gap-4 text-sm">
+                                        <div>
+                                            <dt className="font-medium text-gray-500 text-xs uppercase tracking-wide">Status</dt>
+                                            <dd className="text-gray-900 font-medium mt-1 capitalize">{pollStatus.status}</dd>
+                                        </div>
+                                        <div>
+                                            <dt className="font-medium text-gray-500 text-xs uppercase tracking-wide">Progress</dt>
+                                            <dd className="text-gray-900 font-medium mt-1 capitalize">{pollStatus.progress}</dd>
+                                        </div>
+                                        <div className="col-span-3 space-y-3 pt-2">
+                                            {pollStatus.result && (
+                                                <div>
+                                                    <dt className="font-medium text-gray-500 text-xs uppercase tracking-wide">Result</dt>
+                                                    <dd className="text-gray-900 mt-1 capitalize">{pollStatus.result}</dd>
+                                                </div>
+                                            )}
+                                            {pollStatus.error && (
+                                                <div>
+                                                    <dt className="font-medium text-red-500 text-xs uppercase tracking-wide">Error</dt>
+                                                    <dd className="text-red-600 mt-1 capitalize">{pollStatus.error}</dd>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         <div className="row pb-8">
                             <div className="col-lg-6 mt-4">

@@ -11,7 +11,7 @@ function AugumentImages({ iState, onApply, userData, state, onChange, url }) {
     const { agumentedImages, agumentedGeneratedImages, loading } = useSelector((state) => state.project)
     const [loader, setLoader] = useState(true)
     const [blobUrls, setBlobUrls] = useState([]);
-    console.log(agumentedGeneratedImages, loading, "agumentedImages")
+    // console.log(agumentedGeneratedImages, loading, "agumentedImages")
 
     //==========================================view preview images===========================================
     useEffect(() => {

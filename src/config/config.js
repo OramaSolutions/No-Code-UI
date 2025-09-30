@@ -17,7 +17,7 @@ Url: 'https://nocode-node.oramasolutions.in/api/v1/',
             // 'classification': 'http://192.168.1.177:5000/',
             'text-extraction': 'https://nocode-text-extraction.oramasolutions.in/',
             'objectdetection': 'https://nocode-object-detection.oramasolutions.in/'
-            // 'objectdetection': 'http://192.168.1.187:5000/'
+            // 'objectdetection': 'http://192.168.0.246:5009/'
         };
 
         if (urls[key]) {

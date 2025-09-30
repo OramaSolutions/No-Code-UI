@@ -154,7 +154,7 @@ function Labelled({ iState, updateIstate, userData, state, onApply, onChange, ur
         }
     }
     const importUpload = async () => {
-        if (isDirty == selectedFile.name) {
+        if (isDirty === selectedFile.name) {
             const datasize = {
                 Size: imageUrls.length,
 

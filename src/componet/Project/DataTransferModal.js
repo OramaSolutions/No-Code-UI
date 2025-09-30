@@ -23,10 +23,17 @@ function DataTransferModal({ url, data, setData, apiresponse, setResponse, flag,
     const [pollStatus, setPollStatus] = useState({ status: '', progress: '', result: '', error: '' });
     // Track if polling is active
     const [pollingActive, setPollingActive] = useState(false);
+    // Track if polling should be stopped (e.g. on failure)
+    const [pollingStopped, setPollingStopped] = useState(false);
+    const pollingStoppedRef = useRef(false);
+    useEffect(() => {
+        pollingStoppedRef.current = pollingStopped;
+    }, [pollingStopped]);
     // Poll for training status when modal opens and taskId is available
     useEffect(() => {
         if (data.opentrainModal && taskId && !pollingActive) {
             setPollingActive(true);
+            setPollingStopped(false);
             pollTrainingStatus(taskId);
             pollUntilImageExists();
         }
@@ -37,6 +44,7 @@ function DataTransferModal({ url, data, setData, apiresponse, setResponse, flag,
     const pollTrainingStatus = async (tId) => {
         const pollUrl = `${url}training_status/${tId}`;
         const poll = async () => {
+            if (pollingStoppedRef.current) return;
             try {
                 const res = await fetch(pollUrl);
                 const dataRes = await res.json();
@@ -47,24 +55,36 @@ function DataTransferModal({ url, data, setData, apiresponse, setResponse, flag,
                         result: dataRes.result || '',
                         error: dataRes.error || ''
                     });
+                    console.log("dataRes from polling", dataRes)
                     if (dataRes.progress === 'Training completed successfully') {
                         setData(prev => ({ ...prev, opentraincomplete: true, opentrainModal: true }));
                         setPollingActive(false);
+                        setPollingStopped(true);
+                        return; // Stop polling
+                    }
+                    if (dataRes.progress === 'Training failed') {
+                        setPollStatus(prev => ({ ...prev, error: dataRes.error || 'Training Failed' }));
+                        setPollingActive(false);
+                        setPollingStopped(true);
                         return; // Stop polling
                     }
                 }
                 setTimeout(poll, 10000);
             } catch (err) {
-                setTimeout(poll, 10000);
+                if (!pollingStoppedRef.current) setTimeout(poll, 10000);
             }
         };
         poll();
     };
+    // useEffect(() => { console.log('pollingStopped', pollingStopped) }, [
+    //     pollingStopped
+    // ])
 
     // Polling logic for image existence
     const pollUntilImageExists = async () => {
         const pollUrl = `${url}train_batch_img_get?username=${userData?.activeUser?.userName}&task=${task}&project=${state?.name}&version=${state?.version}`;
         const poll = async () => {
+            if (pollingStoppedRef.current) return;
             try {
                 const res = await fetch(pollUrl);
                 const dataRes = await res.json();
@@ -75,7 +95,7 @@ function DataTransferModal({ url, data, setData, apiresponse, setResponse, flag,
                     setTimeout(poll, 10000);
                 }
             } catch (err) {
-                setTimeout(poll, 10000);
+                if (!pollingStoppedRef.current) setTimeout(poll, 10000);
             }
         };
         poll();
@@ -107,10 +127,10 @@ function DataTransferModal({ url, data, setData, apiresponse, setResponse, flag,
 
 
     const handleclose = () => {
-
         setData({ ...data, opentrainModal: false })
         setResponse("")
         setFlag(false)
+        setPollingStopped(true);
     }
     useEffect(() => {
         if (outputRef.current) {
@@ -129,7 +149,7 @@ function DataTransferModal({ url, data, setData, apiresponse, setResponse, flag,
         }
     }, [flag])
 
-    
+
 
     const fetchData = async () => {
         setStatus(prev => ({ ...prev, loadingMatrix: true, errorMatrix: '' }));
@@ -222,7 +242,7 @@ function DataTransferModal({ url, data, setData, apiresponse, setResponse, flag,
             if (res?.payload?.status === 200) {
                 handleclose()
                 updateIstate(initialstate)
-                toast.success(res?.payload?.data, commomObj)
+                toast.success(res?.payload?.data.message, commomObj)
                 onApply();
             }
         } catch (err) {
@@ -241,20 +261,15 @@ function DataTransferModal({ url, data, setData, apiresponse, setResponse, flag,
     };
 
     const handleProceed = () => {
-        console.log('ran handle proceeed')
         setData({ ...data, opentraincomplete: false, opentrainModal: false });
-        console.log('>>>1 set data')
-        
         setResponse("");
-        console.log('>>>2 set response')
         setFlag(false);
-        console.log('>>>3 set flag')
         onApply();
-        console.log('>>>>>>4 on apply')
         setPollStatus({ status: '', progress: '', result: '', error: '' })
-        setPollingActive(false)
+        setPollingActive(false);
+        setPollingStopped(true);
     };
-    const inProgress = !data?.opentraincomplete;
+    const inProgress = !data?.opentraincomplete && !pollingStopped;
     return (
         <>
             <Modal
@@ -262,7 +277,6 @@ function DataTransferModal({ url, data, setData, apiresponse, setResponse, flag,
                 className="ModalBox LargeModal"
             >
                 <Modal.Body>
-
                     <div className="relative pb-0">
                         <div className="w-full rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-2 shadow-sm">
                             <div className="flex  justify-center ">
@@ -270,17 +284,24 @@ function DataTransferModal({ url, data, setData, apiresponse, setResponse, flag,
                                     {inProgress ? (
                                         <FaSpinner className="animate-spin text-blue-800 mt-0.5" />
                                     ) : (
-                                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-emerald-500 mt-0.5">
-                                            <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                            </svg>
-                                        </div>
+                                        pollingStopped && pollStatus.error ? (
+                                            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-pink-500 mt-0.5">
+                                                <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </div>
+                                        ) : (
+                                            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-emerald-500 mt-0.5">
+                                                <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            </div>
+                                        )
                                     )}
-
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2">
                                             <h5 className="text-base font-semibold text-gray-900">
-                                                {inProgress ? "Training in progress..." : "Training complete"}
+                                                {inProgress ? "Training in progress..." : pollingStopped && pollStatus.error ? "Training failed" : "Training complete"}
                                             </h5>
                                         </div>
                                         {inProgress && (
@@ -288,10 +309,14 @@ function DataTransferModal({ url, data, setData, apiresponse, setResponse, flag,
                                                 Please be patient, this may take some time.
                                             </p>
                                         )}
+                                        {pollingStopped && pollStatus.error && (
+                                            <p className="text-sm text-red-600 mt-1">
+                                                {pollStatus.error}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
-
                             {inProgress && pollStatus && (
                                 <div className="mt-2 rounded-lg bg-white p-4 shadow-xs border border-gray-100">
                                     <div className="grid grid-cols-3 gap-4 text-sm">

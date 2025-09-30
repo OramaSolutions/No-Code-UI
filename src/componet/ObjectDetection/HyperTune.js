@@ -18,19 +18,19 @@ const initialState = {
     fliplr: 0,
     flipud: 0,
     patience: "0",
-    single_class:"False",
-    vaidation_conf: 0.25,
-    advanced: 0,
+    single_class: "False",
+    validation_conf: 0.25,
+    advanced: false,
     loader: false,
-    openModal:false,
-    isDirty:false
+    openModal: false,
+    isDirty: false
 }
 
-function HyperTune({onApply,state,userData,onChange, url }) {
+function HyperTune({ onApply, state, userData, onChange, url }) {
     const dispatch = useDispatch();
     const [istate, updateIstate] = useState(initialState)
-    const {openModal, vaidation_conf, loader, advanced, mosaic, pre_trained_model, imgsz, batch, epochs, close_mosaic, device, dropout, fliplr, flipud, patience, single_class,isDirty } = istate;
-    const { hypertuneModel} = useSelector((state) => state.project)
+    const { openModal, validation_conf, loader, advanced, mosaic, pre_trained_model, imgsz, batch, epochs, close_mosaic, device, dropout, fliplr, flipud, patience, single_class, isDirty } = istate;
+    const { hypertuneModel } = useSelector((state) => state.project)
     console.log('hypertuneModel', hypertuneModel)
     const { hasChangedSteps } = useSelector((state) => state.steps);
     console.log(istate, "istate")
@@ -39,10 +39,10 @@ function HyperTune({onApply,state,userData,onChange, url }) {
         const payload = {
             username: userData?.activeUser?.userName,
             version: state?.version,
-            project:state?.name,
+            project: state?.name,
             task: "objectdetection",
         }
-        dispatch(HypetTuneModal({payload, url}));
+        dispatch(HypetTuneModal({ payload, url }));
 
         const fetchData = async () => {
             try {
@@ -52,27 +52,28 @@ function HyperTune({onApply,state,userData,onChange, url }) {
                     project: state?.name,
                     task: "objectdetection",
                 }
-                const res = await dispatch(ReturnHypertune({payload, url}));
-              if(res?.payload?.status===200){
-                updateIstate((prev)=>({...prev,                     
-                    pre_trained_model:res?.payload?.data?.model?.split?.("/")?.at(-1)|| "",
-                    imgsz: res?.payload?.data?.imgsz||"640",
-                    batch: res?.payload?.data?.batch||"12",
-                    epochs: res?.payload?.data?.epochs||"100",
-                    mosaic:res?.payload?.data?.mosaic|| 0,
-                    close_mosaic:res?.data?.payload?.close_mosaic|| 0,
-                    device:res?.payload?.data?.device|| "0",
-                    dropout: res?.payload?.data?.dropout||"0",
-                    fliplr:res?.payload?.data?.fliplr|| 0,
-                    flipud:res?.payload?.data?.flipud|| 0,
-                    patience: res?.payload?.data?.patience||"0",
-                    single_class:res?.payload?.data?.single_class||"False",
-                    vaidation_conf:res?.payload?.data?.vaidation_conf|| 0.25,                                    
-                    isDirty:true,
-                }))
-              }
+                const res = await dispatch(ReturnHypertune({ payload, url }));
+                if (res?.payload?.status === 200) {
+                    updateIstate((prev) => ({
+                        ...prev,
+                        pre_trained_model: res?.payload?.data?.model?.split?.("/")?.at(-1) || "",
+                        imgsz: res?.payload?.data?.imgsz || "640",
+                        batch: res?.payload?.data?.batch || "12",
+                        epochs: res?.payload?.data?.epochs || "100",
+                        mosaic: res?.payload?.data?.mosaic || 0,
+                        close_mosaic: res?.data?.payload?.close_mosaic || 0,
+                        device: res?.payload?.data?.device || "0",
+                        dropout: res?.payload?.data?.dropout || "0",
+                        fliplr: res?.payload?.data?.fliplr || 0,
+                        flipud: res?.payload?.data?.flipud || 0,
+                        patience: res?.payload?.data?.patience || "0",
+                        single_class: res?.payload?.data?.single_class || "False",
+                        validation_conf: res?.payload?.data?.validation_conf || 0.25,
+                        isDirty: true,
+                    }))
+                }
             } catch (err) {
-                console.log(err,"err hypertune")
+                console.log(err, "err hypertune")
             }
         }
         fetchData();
@@ -81,47 +82,47 @@ function HyperTune({onApply,state,userData,onChange, url }) {
     const inputHandler = (e) => {
         const { name, value, checked } = e.target;
         if (name == "flipud" || name == "fliplr" || name == "close_mosaic" || name == "mosaic") {
-            updateIstate((prev)=>({ ...prev, [name]: checked ? 1 :0 ,isDirty:false}))
-        } else if(name == "single_class"){
-            updateIstate((prev)=>({ ...prev, [name]: checked ? "True" :"False",isDirty:false }))
+            updateIstate((prev) => ({ ...prev, [name]: checked ? 1 : 0, isDirty: true }))
+        } else if (name == "single_class") {
+            updateIstate((prev) => ({ ...prev, [name]: checked ? "True" : "False", isDirty: true }))
         }
         else {
-            updateIstate((prev)=>({ ...prev, [name]: value,isDirty:false }))
+            updateIstate((prev) => ({ ...prev, [name]: value, isDirty: true }))
         }
     }
     //=============================================save handler======================================
     const saveHandler = async () => {
-        if(isDirty||hasChangedSteps?.HyperTune==false){
+        if (!isDirty || hasChangedSteps?.HyperTune == false) {
             onApply();
             return;
         }
         const formData = new FormData();
-        formData.append("username",userData?.activeUser?.userName);
-        formData.append("version",state?.version);
+        formData.append("username", userData?.activeUser?.userName);
+        formData.append("version", state?.version);
         formData.append("project", state?.name);
         formData.append("task", "objectdetection");
         formData.append("pre_trained_model", pre_trained_model);
-        formData.append("batch", batch||"12");
-        formData.append("epochs", epochs||"100");
-        formData.append("imgsz", imgsz||"640");
-        formData.append("mosaic", mosaic||0);
-        formData.append("close_mosaic", close_mosaic||0);
-        formData.append("device", device||"0");
-        formData.append("dropout", dropout||"0");
-        formData.append("fliplr", fliplr||0);
-        formData.append("flipud", flipud||0);
-        formData.append("patience", patience||"0");
-        formData.append("single_cls", single_class||"False");
-        formData.append("vaidation_conf", vaidation_conf||0.25);
+        formData.append("batch", batch || "12");
+        formData.append("epochs", epochs || "100");
+        formData.append("imgsz", imgsz || "640");
+        formData.append("mosaic", mosaic || 0);
+        formData.append("close_mosaic", close_mosaic || 0);
+        formData.append("device", device || "0");
+        formData.append("dropout", dropout || "0");
+        formData.append("fliplr", fliplr || 0);
+        formData.append("flipud", flipud || 0);
+        formData.append("patience", patience || "0");
+        formData.append("single_cls", single_class || "False");
+        formData.append("validation_conf", validation_conf || 0.25);
 
         try {
             updateIstate({ ...istate, loader: true })
-            const response = await dispatch(hyperTune({payload:formData, url}))
+            const response = await dispatch(hyperTune({ payload: formData, url }))
             console.log("File responseeeeeeeeee", response);
             if (response?.payload?.code === 200) {
                 toast.success(response?.payload?.message, commomObj)
-                updateIstate({ ...istate, loader: false,openModal:true })  
-                onChange();             
+                updateIstate({ ...istate, loader: false, openModal: true })
+                onChange();
             }
         } catch (error) {
             toast.error(error?.payload?.message, commomObj)
@@ -137,7 +138,7 @@ function HyperTune({onApply,state,userData,onChange, url }) {
                     <form>
                         <div className="form-group">
                             <label>
-                              Choose model type{" "}
+                                Choose model type{" "}
                                 <span
                                     className="EsclamSpan"
                                     data-toggle="tooltip"
@@ -148,16 +149,16 @@ function HyperTune({onApply,state,userData,onChange, url }) {
                             </label>
                             <select
                                 className="form-control"
-                                name='pre_trained_model'                               
+                                name='pre_trained_model'
                                 onChange={inputHandler}
                             >
                                 <option value="">Choose model type</option>
                                 {hypertuneModel?.models?.length > 0 ?
                                     hypertuneModel?.models?.map((item, i) => {
                                         return (
-                                            <option selected={item==pre_trained_model} value={item}>{item}</option>
+                                            <option selected={item == pre_trained_model} value={item}>{item}</option>
                                         )
-                                    }): <p>No Data found.</p>
+                                    }) : <p>No Data found.</p>
                                 }
                             </select>
                         </div>
@@ -245,7 +246,7 @@ function HyperTune({onApply,state,userData,onChange, url }) {
                                             type="checkbox"
                                             name='mosaic'
                                             value={mosaic}
-                                            checked={mosaic}                                            
+                                            checked={mosaic}
                                             onChange={inputHandler}
                                         />
                                         <span className="slider" />
@@ -316,15 +317,15 @@ function HyperTune({onApply,state,userData,onChange, url }) {
                                                 min={0}
                                                 max={1}
                                                 step={0.1}
-                                                value={vaidation_conf}
-                                                onChange={(value) => updateIstate({ ...istate, vaidation_conf: value })}
+                                                value={validation_conf}
+                                                onChange={(value) => updateIstate({ ...istate, validation_conf: value })}
                                                 className="custom-slider"
                                             />
                                             <div
                                                 className="slider-value"
-                                                style={{ left: `${(vaidation_conf / 1) * 100}%` }} // Adjust position based on slider value
+                                                style={{ left: `${(validation_conf / 1) * 100}%` }} // Adjust position based on slider value
                                             >
-                                                {vaidation_conf?.toFixed(1)}
+                                                {validation_conf?.toFixed(1)}
                                             </div>
                                         </div>
                                     </div>
@@ -332,7 +333,7 @@ function HyperTune({onApply,state,userData,onChange, url }) {
                             </div>
                         </article>
                     </form>
-                    {!advanced ?
+                    {advanced ?
                         <div>
                             <article>
                                 <div className="Heading">
@@ -354,7 +355,7 @@ function HyperTune({onApply,state,userData,onChange, url }) {
                                                 type="checkbox"
                                                 name='single_class'
                                                 value={single_class}
-                                                checked={single_class=="True"?true:false}
+                                                checked={single_class == "True" ? true : false}
                                                 onChange={inputHandler}
 
                                             />
@@ -380,7 +381,7 @@ function HyperTune({onApply,state,userData,onChange, url }) {
                                                     <input type="radio"
                                                         name="device"
                                                         value="0"
-                                                        checked={device=="0"?true:false}
+                                                        checked={device == "0" ? true : false}
                                                         onChange={inputHandler}
                                                     />
                                                     <span className="checkmark" />
@@ -394,7 +395,7 @@ function HyperTune({onApply,state,userData,onChange, url }) {
                                                         type="radio"
                                                         name="device"
                                                         value="cpu"
-                                                        checked={device=="cpu"?true:false}
+                                                        checked={device == "cpu" ? true : false}
                                                         onChange={inputHandler}
                                                     />
                                                     <span className="checkmark" />
@@ -470,17 +471,17 @@ function HyperTune({onApply,state,userData,onChange, url }) {
                             </article>
                         </div> : ""}
                     <div className="text-center" style={{ padding: "35px 0" }}>
-                        {advanced ? <a
+                        {!advanced ? <a
                             role='button'
                             className="AdvanceSettingsCss "
-                            onClick={(e) => updateIstate({ ...istate, advanced: false })}
+                            onClick={(e) => updateIstate({ ...istate, advanced: TextTrackCueList })}
                         >
                             Advance Settings
                         </a> :
                             <a
                                 role='button'
                                 className="AdvanceSettingsCss"
-                                onClick={(e) => updateIstate({ ...istate, advanced: true })}
+                                onClick={(e) => updateIstate({ ...istate, advanced: false })}
                             >
                                 Hide Advance Settings
                             </a>}
@@ -488,7 +489,7 @@ function HyperTune({onApply,state,userData,onChange, url }) {
                     <div className="row">
                         <div className="col-lg-7 mx-auto">
                             <div className="TwoButtons">
-                                <a  className="OutlineBtn">
+                                <a className="OutlineBtn">
                                     Cancel
                                 </a>
                                 <a className="ResetBtn" onClick={() => updateIstate(initialState)}>
@@ -508,13 +509,13 @@ function HyperTune({onApply,state,userData,onChange, url }) {
                 </div>
             </div>
             <TrainModel
-             initialData={istate}
-             setState={updateIstate}
-             onApply={onApply}
-             userData={userData}
-             state={state}
-             task="objectdetection"
-             apiPoint="train_yolov8"
+                initialData={istate}
+                setState={updateIstate}
+                onApply={onApply}
+                userData={userData}
+                state={state}
+                task="objectdetection"
+                apiPoint="train_yolov8"
             />
         </>
     )

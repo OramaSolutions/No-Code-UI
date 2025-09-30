@@ -10,118 +10,6 @@ import ImportAgumentaion from '../ImportAgumentaion';
 import { ToggleRow } from './ToggleRow';
 import { SliderRow } from './SliderRow';
 import { PreviewPair } from './PreviewPair';
-// const augmentationsConfig = [
-//     {
-//         key: "rotation",
-//         label: "Rotation",
-//         tooltip: "Rotate the image by degrees. Helpful if object orientation keeps changing",
-//         controls: [
-//             { stateKey: "rotate_limit", title: "Degree", min: 0, max: 180, step: 1 },
-//             { stateKey: "rotate_prob", title: "Probability", min: 0, max: 1, step: 0.1 },
-//         ],
-//         preview: (s) => ({ transform: s.rotation ? `rotate(${s.rotate_limit}deg)` : "" }),
-//         toPayload: (s) => ({
-//             rotate_limit: s.rotate_limit,
-//             rotate_prob: s.rotate_prob,
-//         }),
-//     },
-//     {
-//         key: "crop",
-//         label: "Crop",
-//         tooltip: "Zoom the image; apply if object distance keeps changing",
-//         controls: [
-//             { stateKey: "cropProb", title: "Probability", min: 0, max: 1, step: 0.1 },
-//             // you can re-enable X/Y/ratio sliders here if needed
-//         ],
-//         preview: (s) =>
-//             s.crop
-//                 ? { width: s.cropX, height: s.cropY, objectFit: "cover", objectPosition: "center", overflow: "hidden" }
-//                 : {},
-//         toPayload: (s) => ({ crop: { p: s.cropProb /* add coords/ratios if needed */ } }),
-//     },
-//     {
-//         key: "verticalFlip",
-//         label: "Vertical Flip",
-//         tooltip: "Mirrors the image on vertical axis",
-//         controls: [{ stateKey: "vertical_flip_prob", title: "Probability", min: 0, max: 1, step: 0.1 }],
-//         preview: (s) => ({ transform: s.verticalFlip ? "scaleY(-1)" : "" }),
-//         toPayload: (s) => ({ vertical_flip_prob: s.vertical_flip_prob }),
-//     },
-//     {
-//         key: "horizontalFlip",
-//         label: "Horizontal Flip",
-//         tooltip: "Mirrors the image on horizontal axis",
-//         controls: [{ stateKey: "horizontal_flip_prob", title: "Probability", min: 0, max: 1, step: 0.1 }],
-//         preview: (s) => ({ transform: s.horizontalFlip ? "scaleX(-1)" : "" }),
-//         toPayload: (s) => ({ horizontal_flip_prob: s.horizontal_flip_prob }),
-//     },
-//     {
-//         key: "brightness",
-//         label: "Brightness",
-//         tooltip: "Brighten/darken image; helpful if lighting changes",
-//         controls: [
-//             { stateKey: "brightness_limit", title: "Value", min: 0, max: 10, step: 0.1 },
-//             { stateKey: "brightness_prob", title: "Probability", min: 0, max: 1, step: 0.1 },
-//         ],
-//         preview: (s) => (s.brightness ? { filter: `brightness(${s.brightness_limit * 20}%)` } : {}),
-//         toPayload: (s) => ({ brightness_limit: [0, s.brightness_limit], brightness_prob: s.brightness_prob }),
-//     },
-//     {
-//         key: "contrast",
-//         label: "Contrast",
-//         tooltip: "Increase contrast when lighting varies",
-//         controls: [
-//             { stateKey: "contrast_limit", title: "Value", min: 0, max: 10, step: 0.1 },
-//             { stateKey: "contrast_prob", title: "Probability", min: 0, max: 1, step: 0.1 },
-//         ],
-//         preview: (s) => (s.contrast ? { filter: `contrast(${s.contrast_limit * 20}%)` } : {}),
-//         toPayload: (s) => ({ contrast_limit: [0, s.contrast_limit], contrast_prob: s.contrast_prob }),
-//     },
-//     {
-//         key: "stauration",
-//         label: "Saturation",
-//         tooltip: "Change saturation; helpful if color changes",
-//         controls: [
-//             { stateKey: "hue_saturation_limit", title: "Value", min: 0, max: 10, step: 0.1 },
-//             { stateKey: "hue_saturation_prob", title: "Probability", min: 0, max: 1, step: 0.1 },
-//         ],
-//         preview: (s) => (s.stauration ? { filter: `saturate(${s.hue_saturation_limit})` } : {}),
-//         toPayload: (s) => ({
-//             hue_saturation_limit: [0, s.hue_saturation_limit],
-//             hue_saturation_prob: s.hue_saturation_prob,
-//         }),
-//     },
-//     {
-//         key: "noise",
-//         label: "Noise",
-//         tooltip: "Add noise; useful for outdoor/noisy scenes",
-//         controls: [
-//             { stateKey: "gauss_noise_var_limit", title: "Pixel", min: 0, max: 5, step: 0.1 },
-//             { stateKey: "gauss_noise_prob", title: "Probability", min: 0, max: 1, step: 0.1 },
-//         ],
-//         preview: (s) =>
-//             s.noise ? { filter: `contrast(${s.gauss_noise_var_limit}) brightness(${1 / s.gauss_noise_var_limit})` } : {},
-//         toPayload: (s) => ({
-//             gauss_noise_var_limit: [0, s.gauss_noise_var_limit],
-//             gauss_noise_prob: s.gauss_noise_prob,
-//         }),
-//     },
-//     {
-//         key: "blur",
-//         label: "Blur",
-//         tooltip: "Blur the image for motion/high speed",
-//         controls: [
-//             { stateKey: "blur_limit", title: "Pixel", min: 0, max: 5, step: 1 },
-//             { stateKey: "blur_prob", title: "Probability", min: 0, max: 1, step: 0.1 },
-//         ],
-//         preview: (s) => (s.blur ? { filter: `blur(${s.blur_limit}px)` } : {}),
-//         toPayload: (s) => ({
-//             // if backend expects array for limit, change to [0, s.blur_limit]
-//             blur_limit: s.blur_limit,
-//             blur_prob: s.blur_prob,
-//         }),
-//     },
-// ];
 
 
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
@@ -446,23 +334,20 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
 
     const checkHandler = (e) => {
         const { name, checked, value } = e.target;
-        if (name == "num_of_images_to_be_generated") {
-            updateIstate({ ...iState, [name]: value, isDirty: false })
-        } else {
-            updateIstate({ ...iState, [name]: checked, isDirty: false })
-        }
+        updateIstate({ ...iState, [name]: name === "num_of_images_to_be_generated" ? value : checked, isDirty: true })
     }
 
     const inputHandler = (value, name) => {
-        updateIstate({ ...iState, [name]: value, isDirty: false })
+        updateIstate({ ...iState, [name]: value, isDirty: true })
     }
 
     const saveHandler = async () => {
-        if (isDirty || hasChangedSteps?.augumented == false) {
-            window.localStorage.setItem("AgumentedSize", (DatasetSize?.Size) * num_of_images_to_be_generated)
-            onApply()
-            return;
-        }
+        // console.log('save handler called,isDirty:', isDirty, 'hasChangedSteps:', hasChangedSteps);
+        // if (!isDirty || hasChangedSteps?.augumented == false) {
+        //     window.localStorage.setItem("AgumentedSize", (DatasetSize?.Size) * num_of_images_to_be_generated)
+        //     onApply()
+        //     return;
+        // }
         if (!num_of_images_to_be_generated) {
             toast.error("Please Selelct The no. of Images to be generated", commomObj)
         }
@@ -470,35 +355,7 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
             try {
                 abortControllerReff.current = new AbortController();
                 updateIstate({ ...iState, openModal: true })
-                // const augmentations = {
-                //     augmentations: {
-                //         rotate_limit,
-                //         rotate_prob,
-                //         vertical_flip_prob,
-                //         horizontal_flip_prob,
-                //         brightness_limit: [0, brightness_limit],
-                //         brightness_prob,
-                //         contrast_limit: [0, contrast_limit],
-                //         contrast_prob,
-                //         hue_saturation_limit: [0, hue_saturation_limit],
-                //         hue_saturation_prob,
-                //         gauss_noise_var_limit: [0, gauss_noise_var_limit],
-                //         gauss_noise_prob,
-                //         // blur_limit: [0, blur_limit],
-                //         blur_prob,
-
-                //         crop: {
-                //             p: cropProb,
-                //             // xmin: 0,
-                //             // ymin: 0,
-                //             // xmax: cropX,
-                //             // ymax: cropY,
-                //             // cropXratio: iState.cropXratio,
-                //             // cropYratio: iState.cropYratio,
-                //         }
-
-                //     }
-                // }
+              
 
                 const augmentations = buildAugPayload(iState);
                 const jsonString = JSON.stringify(augmentations);

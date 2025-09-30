@@ -130,18 +130,18 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
     const checkHandler = (e) => {
         const { name, checked, value } = e.target;
         if (name == "num_of_images_to_be_generated") {
-            updateIstate({ ...iState, [name]: value, isDirty: false })
+            updateIstate({ ...iState, [name]: value, isDirty: true })
         } else {
-            updateIstate({ ...iState, [name]: checked, isDirty: false })
+            updateIstate({ ...iState, [name]: checked, isDirty: true })
         }
     }
 
     const inputHandler = (value, name) => {
-        updateIstate({ ...iState, [name]: value, isDirty: false })
+    updateIstate({ ...iState, [name]: value, isDirty: true })
     }
 
     const saveHandler = async () => {
-        if (isDirty || hasChangedSteps?.augumented == false) {
+        if (!isDirty || hasChangedSteps?.augumented == false) {
             window.localStorage.setItem("AgumentedSize", (DatasetSize?.Size) * num_of_images_to_be_generated)
             onApply()
             return;

@@ -8,17 +8,17 @@ import TrainModel from '../Project/TrainModel';
 
 const initialState = {
     pre_trained_model: "",
-    imgsz: "640",
-    batch: "12",
-    epochs: "100",
+    imgsz: 640,
+    batch: 32,
+    epochs: 60,
     mosaic: 0,
     close_mosaic: 0,
-    device: "0",
-    dropout: "0",
+    device: 0,
+    dropout: 0,
     fliplr: 0,
     flipud: 0,
-    patience: "0",
-    single_class: "False",
+    patience: 20,
+    single_cls: false,
     validation_conf: 0.25,
     advanced: false,
     loader: false,
@@ -29,11 +29,11 @@ const initialState = {
 function HyperTune({ onApply, state, userData, onChange, url }) {
     const dispatch = useDispatch();
     const [istate, updateIstate] = useState(initialState)
-    const { openModal, validation_conf, loader, advanced, mosaic, pre_trained_model, imgsz, batch, epochs, close_mosaic, device, dropout, fliplr, flipud, patience, single_class, isDirty } = istate;
+    const { openModal, validation_conf, loader, advanced, mosaic, pre_trained_model, imgsz, batch, epochs, close_mosaic, device, dropout, fliplr, flipud, patience, single_cls, isDirty } = istate;
     const { hypertuneModel } = useSelector((state) => state.project)
-    console.log('hypertuneModel', hypertuneModel)
+    // console.log('hypertuneModel', hypertuneModel)
     const { hasChangedSteps } = useSelector((state) => state.steps);
-    console.log(istate, "istate")
+   
     //==========================================pre-trained model============================================
     useEffect(() => {
         const payload = {
@@ -54,20 +54,21 @@ function HyperTune({ onApply, state, userData, onChange, url }) {
                 }
                 const res = await dispatch(ReturnHypertune({ payload, url }));
                 if (res?.payload?.status === 200) {
+                    // console.log(">>>>.", res?.payload?.data?.single_cls, res?.payload?.data?.single_cls === 'true')
                     updateIstate((prev) => ({
                         ...prev,
                         pre_trained_model: res?.payload?.data?.model?.split?.("/")?.at(-1) || "",
-                        imgsz: res?.payload?.data?.imgsz || "640",
-                        batch: res?.payload?.data?.batch || "12",
-                        epochs: res?.payload?.data?.epochs || "100",
+                        imgsz: res?.payload?.data?.imgsz || 640,
+                        batch: res?.payload?.data?.batch || 32,
+                        epochs: res?.payload?.data?.epochs || 60,
                         mosaic: res?.payload?.data?.mosaic || 0,
                         close_mosaic: res?.data?.payload?.close_mosaic || 0,
-                        device: res?.payload?.data?.device || "0",
-                        dropout: res?.payload?.data?.dropout || "0",
+                        device: res?.payload?.data?.device || 0,
+                        dropout: res?.payload?.data?.dropout || 0,
                         fliplr: res?.payload?.data?.fliplr || 0,
                         flipud: res?.payload?.data?.flipud || 0,
-                        patience: res?.payload?.data?.patience || "0",
-                        single_class: res?.payload?.data?.single_class || "False",
+                        patience: res?.payload?.data?.patience || 20,
+                        single_cls: res?.payload?.data?.single_cls === "true",
                         validation_conf: res?.payload?.data?.validation_conf || 0.25,
                         isDirty: true,
                     }))
@@ -79,17 +80,83 @@ function HyperTune({ onApply, state, userData, onChange, url }) {
         fetchData();
     }, []);
     //===========================================input handler==========================================
+    // const inputHandler = (e) => {
+    //     const { name, value, checked } = e.target;
+    //     if (name == "flipud" || name == "fliplr" || name == "close_mosaic" || name == "mosaic") {
+    //         updateIstate((prev) => ({ ...prev, [name]: checked ? 1 : 0, isDirty: true }))
+    //     } else if (name == "single_cls") {
+    //         updateIstate((prev) => ({ ...prev, [name]: checked ? "True" : "False", isDirty: true }))
+    //     }
+    //     else {
+    //         updateIstate((prev) => ({ ...prev, [name]: value, isDirty: true }))
+    //     }
+    // }
+
     const inputHandler = (e) => {
-        const { name, value, checked } = e.target;
-        if (name == "flipud" || name == "fliplr" || name == "close_mosaic" || name == "mosaic") {
-            updateIstate((prev) => ({ ...prev, [name]: checked ? 1 : 0, isDirty: true }))
-        } else if (name == "single_class") {
-            updateIstate((prev) => ({ ...prev, [name]: checked ? "True" : "False", isDirty: true }))
+        const { name, value, checked, type } = e.target;
+
+        // Boolean checkbox mapped to "True"/"False" for backend single_cls
+        if (name === "single_cls") {
+            console.log(name, checked, "nameeee")
+            updateIstate((prev) => ({
+                ...prev,
+                [name]: checked ? "true" : "false",
+                isDirty: true,
+            }));
+            return;
         }
-        else {
-            updateIstate((prev) => ({ ...prev, [name]: value, isDirty: true }))
+
+
+        if (name === "close_mosaic") {
+            if (value > epochs) {
+                return toast.error("Close mosaic value should not be greater than epochs value", commomObj)
+            }
+            updateIstate((prev) => ({
+                ...prev,
+                [name]: value === "" ? "" : Number(value),
+                isDirty: true,
+            }));
+            return;
         }
-    }
+
+        // Numeric text/number inputs
+        const numericFields = new Set([
+            "imgsz",
+            "batch",
+            "epochs",
+            "patience",
+
+        ]);
+
+        if (numericFields.has(name)) {
+            // Allow empty to let user clear field; otherwise coerce to number
+            updateIstate((prev) => ({
+                ...prev,
+                [name]: value === "" ? "" : Number(value),
+                isDirty: true,
+            }));
+            return;
+        }
+
+        // Radio/select values stay as strings
+        const stringFields = new Set(["pre_trained_model", "device"]);
+        if (stringFields.has(name)) {
+            updateIstate((prev) => ({
+                ...prev,
+                [name]: value,
+                isDirty: true,
+            }));
+            return;
+        }
+
+        // Fallback: store as-is
+        updateIstate((prev) => ({
+            ...prev,
+            [name]: value,
+            isDirty: true,
+        }));
+    };
+
     //=============================================save handler======================================
     const saveHandler = async () => {
         if (!isDirty || hasChangedSteps?.HyperTune == false) {
@@ -102,17 +169,17 @@ function HyperTune({ onApply, state, userData, onChange, url }) {
         formData.append("project", state?.name);
         formData.append("task", "objectdetection");
         formData.append("pre_trained_model", pre_trained_model);
-        formData.append("batch", batch || "12");
-        formData.append("epochs", epochs || "100");
-        formData.append("imgsz", imgsz || "640");
+        formData.append("batch", batch || 32);
+        formData.append("epochs", epochs || 60);
+        formData.append("imgsz", imgsz || 640);
         formData.append("mosaic", mosaic || 0);
         formData.append("close_mosaic", close_mosaic || 0);
-        formData.append("device", device || "0");
-        formData.append("dropout", dropout || "0");
+        formData.append("device", device || 0);
+        formData.append("dropout", dropout || 0);
         formData.append("fliplr", fliplr || 0);
         formData.append("flipud", flipud || 0);
-        formData.append("patience", patience || "0");
-        formData.append("single_cls", single_class || "False");
+        formData.append("patience", patience || 20);
+        formData.append("single_cls", single_cls);
         formData.append("validation_conf", validation_conf || 0.25);
 
         try {
@@ -240,7 +307,7 @@ function HyperTune({ onApply, state, userData, onChange, url }) {
                                         title="Disable if images are similar and object size is small"
                                     />
                                 </p>
-                                <div className="form-group">
+                                {/* <div className="form-group">
                                     <label className="switch">
                                         <input
                                             type="checkbox"
@@ -251,18 +318,42 @@ function HyperTune({ onApply, state, userData, onChange, url }) {
                                         />
                                         <span className="slider" />
                                     </label>
+                                </div> */}
+                                <div className="form-group">
+                                    <div className="RangeBox">
+                                        <div className="RangeHeading">
+                                            <label>Min Val</label>
+                                            <label>Max Value</label>
+                                        </div>
+                                        <div className='slider-container'>
+                                            <Slider
+                                                min={0}
+                                                max={1}
+                                                step={0.1}
+                                                value={mosaic}
+                                                onChange={(value) => updateIstate({ ...istate, mosaic: value })}
+                                                className="custom-slider"
+                                            />
+                                            <div
+                                                className="slider-value"
+                                                style={{ left: `${(mosaic / 1) * 100}%` }} // Adjust position based on slider value
+                                            >
+                                                {mosaic?.toFixed(1)}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div className="SetValueBox">
                                 <p>
-                                    Flipir{" "}
+                                    Fliplr{" "}
                                     <img
                                         src={require("../../assets/images/esclamination.png")}
                                         data-toggle="tooltip"
                                         title="Probabity of images to flip left to right during the time of training"
                                     />
                                 </p>
-                                <div className="form-group">
+                                {/* <div className="form-group">
                                     <label className="switch">
                                         <input
                                             type="checkbox"
@@ -273,6 +364,30 @@ function HyperTune({ onApply, state, userData, onChange, url }) {
                                         />
                                         <span className="slider" />
                                     </label>
+                                </div> */}
+                                <div className="form-group">
+                                    <div className="RangeBox">
+                                        <div className="RangeHeading">
+                                            <label>Min Val</label>
+                                            <label>Max Value</label>
+                                        </div>
+                                        <div className='slider-container'>
+                                            <Slider
+                                                min={0}
+                                                max={1}
+                                                step={0.1}
+                                                value={fliplr}
+                                                onChange={(value) => updateIstate({ ...istate, fliplr: value })}
+                                                className="custom-slider"
+                                            />
+                                            <div
+                                                className="slider-value"
+                                                style={{ left: `${(fliplr / 1) * 100}%` }} // Adjust position based on slider value
+                                            >
+                                                {fliplr?.toFixed(1)}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div className="SetValueBox">
@@ -284,7 +399,7 @@ function HyperTune({ onApply, state, userData, onChange, url }) {
                                         title="Probability of images to flip upside down at the time of training"
                                     />
                                 </p>
-                                <div className="form-group">
+                                {/* <div className="form-group">
                                     <label className="switch">
                                         <input
                                             type="checkbox"
@@ -295,6 +410,30 @@ function HyperTune({ onApply, state, userData, onChange, url }) {
                                         />
                                         <span className="slider" />
                                     </label>
+                                </div> */}
+                                <div className="form-group">
+                                    <div className="RangeBox">
+                                        <div className="RangeHeading">
+                                            <label>Min Val</label>
+                                            <label>Max Value</label>
+                                        </div>
+                                        <div className='slider-container'>
+                                            <Slider
+                                                min={0}
+                                                max={1}
+                                                step={0.1}
+                                                value={flipud}
+                                                onChange={(value) => updateIstate({ ...istate, flipud: value })}
+                                                className="custom-slider"
+                                            />
+                                            <div
+                                                className="slider-value"
+                                                style={{ left: `${(flipud / 1) * 100}%` }} // Adjust position based on slider value
+                                            >
+                                                {flipud?.toFixed(1)}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div className="SetValueBox">
@@ -353,9 +492,9 @@ function HyperTune({ onApply, state, userData, onChange, url }) {
                                         <label className="switch">
                                             <input
                                                 type="checkbox"
-                                                name='single_class'
-                                                value={single_class}
-                                                checked={single_class == "True" ? true : false}
+                                                name='single_cls'
+                                                value={single_cls}
+                                                checked={single_cls}
                                                 onChange={inputHandler}
 
                                             />
@@ -427,14 +566,14 @@ function HyperTune({ onApply, state, userData, onChange, url }) {
                                 </div>
                                 <div className="SetValueBox">
                                     <p>
-                                        Close_Mosaic{" "}
+                                        Close Mosaic{" "}
                                         <img
                                             src={require("../../assets/images/esclamination.png")}
                                             data-toggle="tooltip"
                                             title="Add mosaicing in the last 10 epochs to mitigate overfitting."
                                         />
                                     </p>
-                                    <div className="form-group">
+                                    {/* <div className="form-group">
                                         <label className="switch">
                                             <input
                                                 type="checkbox"
@@ -445,6 +584,17 @@ function HyperTune({ onApply, state, userData, onChange, url }) {
                                             />
                                             <span className="slider" />
                                         </label>
+                                    </div> */}
+                                    <div className="form-group">
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            placeholder="Numeric Input"
+                                            name="close_mosaic"
+                                            value={close_mosaic}
+                                            onWheel={(e) => e.target.blur()}
+                                            onChange={inputHandler}
+                                        />
                                     </div>
                                 </div>
                                 <div className="SetValueBox">
@@ -456,16 +606,42 @@ function HyperTune({ onApply, state, userData, onChange, url }) {
                                             title="Dropout"
                                         />
                                     </p>
-                                    <div className="form-group">
+                                    {/* <div className="form-group">
                                         <input
                                             type="number"
                                             className="form-control"
                                             placeholder="Numeric Input"
                                             name="dropout"
                                             value={dropout}
+                                            max={0.5}
+                                            step="0.01"
                                             onWheel={(e) => e.target.blur()}
                                             onChange={inputHandler}
                                         />
+                                    </div> */}
+                                    <div className="form-group">
+                                        <div className="RangeBox">
+                                            <div className="RangeHeading">
+                                                <label>Min Val</label>
+                                                <label>Max Value</label>
+                                            </div>
+                                            <div className='slider-container'>
+                                                <Slider
+                                                    min={0}
+                                                    max={0.5}
+                                                    step={0.1}
+                                                    value={dropout}
+                                                    onChange={(value) => updateIstate({ ...istate, dropout: value })}
+                                                    className="custom-slider"
+                                                />
+                                                <div
+                                                    className="slider-value"
+                                                    style={{ left: `${(dropout / 1) * 100}%` }} // Adjust position based on slider value
+                                                >
+                                                    {dropout?.toFixed(1)}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </article>

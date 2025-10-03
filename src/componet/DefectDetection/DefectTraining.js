@@ -13,13 +13,13 @@ import { getUrl } from '../../config/config';
 import DefectRemark from './DefectRemark';
 import Application from './Application'
 import { useStepPersistence } from './useStepPersistence';
-
+import Loader from '../../commonComponent/Loader'
 const url = getUrl('defectdetection')
-console.log('url', url)
+// console.log('url', url)
 
 function DefectTraining() {
     const dispatch = useDispatch();
-    const [iState, updateIstate] = useState("labelled") // Keep existing state
+    const [iState, updateIstate] = useState(null);// Keep existing state
     const userData = JSON.parse(window.localStorage.getItem("userLogin"))
     const { hasChangedSteps } = useSelector((state) => state.steps);
 
@@ -118,14 +118,14 @@ function DefectTraining() {
     };
 
     // Show loader while fetching status
-    if (isLoading) {
+    if (isLoading || !iState) {
         return (
             <div>
                 <Header />
                 <Sidenav />
                 <div className="WrapperArea">
                     <div className="WrapperBox">
-                        <div>Loading project status...</div>
+                        <Loader />
                     </div>
                 </div>
             </div>
@@ -134,7 +134,7 @@ function DefectTraining() {
 
     return (
         <div>
-            <Header />  
+            <Header />
             <Sidenav />
             <div className="WrapperArea">
                 <div className="WrapperBox">

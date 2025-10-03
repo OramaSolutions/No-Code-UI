@@ -27,7 +27,7 @@ export const useStepPersistence = (userData, projectState) => {
         }
       });
 
-      console.log('Project status response:', response);
+      // console.log('Project status response:', response);
 
       if (response.status === 200) {
         const { current_step, step_status } = response.data;

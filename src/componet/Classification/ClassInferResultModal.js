@@ -16,7 +16,7 @@ function ClassInferResultModal({ onOpen, prediction, setOutput, state, userData,
                     setLoading(true);
                     const URL = `${url}top_${prediction}_accuracy?username=${userData?.activeUser?.userName}&task=classification&project=${state?.name}&version=${state?.version}`;
                     const response = await axios.get(URL);
-                    console.log('response', response.data, prediction)
+                    // console.log('response', response.data, prediction)
                     setInferprediction(response?.data?.[`top_${prediction}_accuracy`]);
                     setLoading(false);
 

@@ -31,44 +31,86 @@ function Labelled({ iState, updateIstate, userData, state, onApply, onChange, ur
     const dispatch = useDispatch();
     // console.log('url', url)
 
+    // useEffect(() => {
+    //     const fetchAndSaveStreamingZip = async () => {
+    //         console.log('fetch and save streaming zip called in the useEffect')
+    //         try {
+    //             const response = await fetch(`${url}return_import_dataset?username=${userData?.activeUser?.userName}&task=objectdetection&project=${state?.name}&version=${state?.version}`, {
+    //                 method: 'GET',
+    //             });
+    //             console.log("responseeee",response)
+    //             if (!response.ok) {
+    //                 throw new Error(`HTTP error! status: ${response.status}`);
+    //             }
+    //             const datasize = {
+    //                 Size: response,
+
+    //             }
+    //             console.log('setting dataset size', imageUrls.length)
+    //             window.localStorage.setItem("DataSize", JSON.stringify(datasize))
+
+    //             const filename = response.headers.get('x-filename') || 'default_filename.zip';
+    //             const reader = response.body.getReader();
+    //             const chunks = [];
+    //             while (true) {
+    //                 const { done, value } = await reader.read();
+    //                 if (done) break;
+    //                 chunks.push(value);
+    //             }
+    //             const zipBlob = new Blob(chunks, { type: 'application/zip' });
+    //             const dummyData = new File([zipBlob], filename, { type: 'application/zip' });
+    //             setIsDirty(filename)
+    //             setSelectedFile(dummyData);
+    //             processZipFileInWorker(dummyData);
+    //         } catch (err) {
+    //             console.log(err, "errrrrr")
+    //         }
+    //     }
+    //     fetchAndSaveStreamingZip();
+
+
+    // }, [])
+
     useEffect(() => {
-        const fetchAndSaveStreamingZip = async () => {
-            try {
-                const response = await fetch(`${url}return_import_dataset?username=${userData?.activeUser?.userName}&task=objectdetection&project=${state?.name}&version=${state?.version}`, {
-                    method: 'GET',
-                });
-                console.log("responseeee",response)
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const datasize = {
-                    Size: response,
+    const fetchThumbnails = async () => {
+        console.log('Fetching dataset thumbnails...');
+        try {
+            const response = await fetch(
+                `${url}get_thumbnails?username=${userData?.activeUser?.userName}&task=objectdetection&project=${state?.name}&version=${state?.version}&thumbnail_name=dataset_thumbnails`,
+                { method: 'GET' }
+            );
 
-                }
-                console.log('setting dataset size', imageUrls.length)
-                window.localStorage.setItem("DataSize", JSON.stringify(datasize))
-
-                const filename = response.headers.get('x-filename') || 'default_filename.zip';
-                const reader = response.body.getReader();
-                const chunks = [];
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    chunks.push(value);
-                }
-                const zipBlob = new Blob(chunks, { type: 'application/zip' });
-                const dummyData = new File([zipBlob], filename, { type: 'application/zip' });
-                setIsDirty(filename)
-                setSelectedFile(dummyData);
-                processZipFileInWorker(dummyData);
-            } catch (err) {
-                console.log(err, "errrrrr")
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+
+            const data = await response.json();
+            console.log("Thumbnails API response:", data);
+
+            if (data?.thumbnails && data.thumbnails.length > 0 && data.count) {
+                // Save count in localStorage
+                window.localStorage.setItem("DataSize", JSON.stringify({ Size: data.count }));
+
+               setIstate(prev => ({
+                    ...prev,
+                    imageUrls: data.thumbnails
+                }));
+
+                console.log(`Found ${data.count} thumbnails`);
+            } else {
+                console.log("No thumbnails found.");
+            }
+
+        } catch (err) {
+            console.error("Error fetching thumbnails:", err);
         }
-        fetchAndSaveStreamingZip();
+    };
+
+    fetchThumbnails();
+}, [url, userData?.activeUser?.userName, state?.name, state?.version]);
 
 
-    }, [])
+   
     const onDrop = useCallback((acceptedFiles) => {
         const file = acceptedFiles[0];
         console.log(file, "fileeeeeeeeee")

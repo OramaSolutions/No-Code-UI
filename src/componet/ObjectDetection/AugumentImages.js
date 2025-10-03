@@ -14,35 +14,81 @@ function AugumentImages({ iState, onApply, userData, state, onChange, url }) {
     // console.log(agumentedGeneratedImages, loading, "agumentedImages")
 
     //==========================================view preview images===========================================
+
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         try {
+    //             const payload = {
+    //                 username: userData?.activeUser?.userName,
+    //                 version: state?.version,
+    //                 project: state?.name,
+    //                 task: "objectdetection",
+    //             }
+    //             const res = await dispatch(AgumentedImage({ payload, url }));
+    //             console.log(res, "agumenation images")
+    //             if (res?.payload?.code === 200 && res?.payload?.images) {
+    //                 console.log(res?.payload?.images, "res?.payload?.data")
+    //                 const binaryString = res?.payload?.images
+    //                 const extractedImages = binaryString?.map(img => base64ToImageUrl(img.image_base64));
+    //                 setBlobUrls(extractedImages);
+    //                 setLoader(false)
+    //             } else {
+    //                 toast.error(res?.payload?.error, commomObj)
+    //                 setLoader(false)
+    //             }
+    //         } catch (err) {
+    //             toast.error("Oops! Something went wrong", commomObj)
+    //             console.log(err, "errr")
+    //             setLoader(false)
+    //         }
+    //     }
+    //     fetchData();
+    // }, []);
+
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchThumbnails = async () => {
+            console.log('Fetching dataset thumbnails...');
             try {
-                const payload = {
-                    username: userData?.activeUser?.userName,
-                    version: state?.version,
-                    project: state?.name,
-                    task: "objectdetection",
+                const response = await fetch(
+                    `${url}get_thumbnails?username=${userData?.activeUser?.userName}&task=objectdetection&project=${state?.name}&version=${state?.version}&thumbnail_name=preview_images_thumbnails`,
+                    { method: 'GET' }
+                );
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                const res = await dispatch(AgumentedImage({ payload, url }));
-                console.log(res, "agumenation images")
-                if (res?.payload?.code === 200 && res?.payload?.images) {
-                    console.log(res?.payload?.images, "res?.payload?.data")
-                    const binaryString = res?.payload?.images
-                    const extractedImages = binaryString?.map(img => base64ToImageUrl(img.image_base64));
-                    setBlobUrls(extractedImages);
+
+                const data = await response.json();
+                console.log("Thumbnails API response:", data);
+
+                if (data?.thumbnails && data.thumbnails.length > 0) {
+                    // Save count in localStorage
+                    // window.localStorage.setItem("DataSize", JSON.stringify({ Size: data.count }));
+
+                    //    setIstate(prev => ({
+                    //         ...prev,
+                    //         imageUrls: data.thumbnails
+                    //     }));
+                    setBlobUrls(data.thumbnails)
+
+                    // console.log(`Found ${data.count} thumbnails`);
                     setLoader(false)
                 } else {
-                    toast.error(res?.payload?.error, commomObj)
+                    toast.error('No thumbnails found', commomObj)
                     setLoader(false)
                 }
+
             } catch (err) {
+                console.error("Error fetching thumbnails:", err);
                 toast.error("Oops! Something went wrong", commomObj)
-                console.log(err, "errr")
                 setLoader(false)
             }
-        }
-        fetchData();
-    }, []);
+        };
+
+        fetchThumbnails();
+    }, [url, userData?.activeUser?.userName, state?.name, state?.version]);
+
+
     //=========================================image converter===========================================
     const base64ToImageUrl = (base64) => {
         return `data:image/png;base64,${base64}`;
@@ -106,9 +152,9 @@ function AugumentImages({ iState, onApply, userData, state, onChange, url }) {
                     <div className="row">
                         <div className="col-lg-7 mx-auto">
                             <div className="TwoButtons">
-                                <a className="OutlineBtn" role='button' onClick={generatedImages}>
+                                {/* <a className="OutlineBtn" role='button' onClick={generatedImages}>
                                     View Generated Images
-                                </a>
+                                </a> */}
                                 <a className="FillBtn" role='button' onClick={saveHandler}>
                                     Next
                                 </a>

@@ -42,7 +42,7 @@ export const importData = createAsyncThunk('project/importData', async ({ payloa
     console.log('response.....', response)
     // console.log(response, "response................")
     if (response.status === 201) {
-      console.log(response.data, "response.data")
+      // console.log(response.data, "response.data")
       return response;
     } else {
       return rejectWithValue(response || response);
@@ -63,7 +63,7 @@ export const AugumentedData = createAsyncThunk('project/augumentation', async ({
     });
     // console.log(response, "response................")
     if (response.status === 201) {
-      console.log(response.data, "response.data")
+      // console.log(response.data, "response.data")
       return response.data;
     } else {
       return rejectWithValue(response.data);
@@ -116,7 +116,7 @@ export const AgumentedImage = createAsyncThunk('project/agumentedImage', async (
   try {
     const response = await axios.get(`${url}preview_images?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
     );
-    console.log(response, "response.data")
+    // console.log(response, "response.data")
     if (response.status === 200) {
       return response.data;
     } else {
@@ -132,7 +132,7 @@ export const AgumentedGeneratedImage = createAsyncThunk('project/agumentedgenera
   try {
     const response = await axios.get(`${url}view_generated_images?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
     );
-    console.log(response, "response.data")
+    // console.log(response, "response.data")
     if (response.status === 200) {
       return response.data;
     } else {
@@ -148,7 +148,7 @@ export const HypetTuneModal = createAsyncThunk('project/hypertunemodel', async (
   try {
     const response = await axios.get(`${url}models_download?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
     );
-    console.log(response, "response.data")
+    // console.log(response, "response.data")
     if (response.status === 200) {
       return response.data;
     } else {
@@ -165,7 +165,7 @@ export const DataSplitImages = createAsyncThunk('project/datasplitimages', async
 
     const response = await axios.get(`${url}split_data?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}&split_ratio=${payload?.split_ratio}`
     );
-    console.log(response, "response.data")
+    // console.log(response, "response.data")
     if (response.status === 200) {
       return response.data;
     } else {
@@ -227,7 +227,7 @@ export const TrainingbatchApi = createAsyncThunk('project/Trainingbatch', async 
     const newPoint = payload?.task == "classification" ? "training_batches_cls" : "training_batches"
     const response = await axios.get(`${url}${newPoint}?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
     );
-    console.log(response, "response.data")
+    // console.log(response, "response.data")
     if (response.status === 200) {
       return response.data;
     } else {
@@ -397,7 +397,7 @@ export const ReturnDataSplit = createAsyncThunk('project/ReturnDataSplit', async
   try {
     const response = await axios.get(`${url}return_split_ratio?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
     );
-    console.log(response, "response.data")
+    // console.log(response, "response.data")
     if (response.status === 200) {
       return response;
     } else {
@@ -413,7 +413,7 @@ export const ReturnHypertune = createAsyncThunk('project/ReturnHypertune', async
   try {
     const response = await axios.get(`${url}return_tune_hyperparameter?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
     );
-    console.log(response, "response.data")
+    // console.log(response, "response.data")
     if (response.status === 200) {
       return response;
     } else {

@@ -12,7 +12,7 @@ Url: 'https://nocode-node.oramasolutions.in/api/v1/',
     getUrl: function (key) {
         const urls = {
            'defectdetection': 'https://nocode-defect-detection.oramasolutions.in/',
-        //    'defectdetection': 'http://192.168.0.246:5000/',
+            // 'defectdetection': 'http://192.168.0.246:5000/',
             'classification': 'https://nocode-classification.oramasolutions.in/',
             // 'classification': 'http://192.168.1.177:5000/',
             'text-extraction': 'https://nocode-text-extraction.oramasolutions.in/',
@@ -26,4 +26,5 @@ Url: 'https://nocode-node.oramasolutions.in/api/v1/',
             throw new Error(`Invalid key: ${key}`);
         }
     }
+    
 };

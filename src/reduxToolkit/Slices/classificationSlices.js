@@ -56,7 +56,7 @@ export const ClassAgumentedImage = createAsyncThunk('classification/agumentedIma
     try {
         const response = await axios.get(`${url}preview_images_cls?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
         );
-        console.log(response, "response.data")
+        // console.log(response, "response.data")
         if (response.status === 200) {
             return response.data;
         } else {
@@ -73,7 +73,7 @@ export const ClassAgumentedGeneratedImage = createAsyncThunk('classification/agu
     try {
         const response = await axios.get(`${url}view_generated_images_cls?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
         );
-        console.log(response, "response.data")
+        // console.log(response, "response.data")
         if (response.status === 200) {
             return response.data;
         } else {
@@ -92,7 +92,7 @@ export const PreviewDataSplitImages = createAsyncThunk(
             const response = await axios.get(
                 `${url}preview_images_data_split_cls?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
             );
-            console.log(response, "preview response.data")
+            // console.log(response, "preview response.data")
             if (response.status === 200) {
                 return response.data;
             } else {
@@ -108,7 +108,7 @@ export const ClassDataSplitImages = createAsyncThunk('classification/datasplitim
 
         const response = await axios.get(`${url}split_data_cls?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}&split_ratio=${payload?.split_ratio}`
         );
-        console.log(response, "response.data")
+        // console.log(response, "response.data")
         if (response.status === 200) {
             return response.data;
         } else {
@@ -124,7 +124,7 @@ export const ClassHypetTuneModal = createAsyncThunk('classification/classhypertu
     try {
         const response = await axios.get(`${url}models_cls?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
         );
-        console.log(response, "response.data")
+        // console.log(response, "response.data")
         if (response.status === 200) {
             return response.data;
         } else {
@@ -176,7 +176,7 @@ export const ReturnClassDataSplit = createAsyncThunk('classification/ReturnClass
         console.log("payload in return split data cls", payload)
         const response = await axios.get(`${url}return_split_data_cls?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
         );
-        console.log(response, "response.data")
+        // console.log(response, "response.data")
         if (response.status === 200) {
             return response;
         } else {
@@ -192,7 +192,7 @@ export const ReturnClassHypertune = createAsyncThunk('classification/ReturnClass
     try {
         const response = await axios.get(`${url}return_tune_hyperparameter_cls?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
         );
-        console.log(response, "response.data")
+        // console.log(response, "response.data")
         if (response.status === 200) {
             return response;
         } else {

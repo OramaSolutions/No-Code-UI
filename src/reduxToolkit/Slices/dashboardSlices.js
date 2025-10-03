@@ -11,7 +11,7 @@ const initialState = {
 export const dashboardList = createAsyncThunk('dashboard/dashboardlist', async (payload, { rejectWithValue }) => {
     try {
         const token = isLoggedIn("userLogin");
-        console.log(token, "checking token")
+        
         const response = await axios.get(`${Url}user/myLatestProjectList`, {
             headers: { Authorization: `${token}` },
         });

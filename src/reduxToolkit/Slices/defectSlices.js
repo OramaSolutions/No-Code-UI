@@ -51,7 +51,7 @@ export const DefectModal = createAsyncThunk('defect/hypertunemodel', async (payl
     try {
         const response = await axios.get(`${url}models?username=${payload?.username}&task=${payload?.task}&project=${payload?.project}&version=${payload?.version}`
         );
-        console.log(response, "response.data")
+        // console.log(response, "response.data")
         if (response.status === 200) {
             return response.data;
         } else {
@@ -67,7 +67,7 @@ export const DefectModalTrain = createAsyncThunk('defect/train_infer', async (pa
     try {
         const response = await axios.get(`${url}train_infer?username=${payload?.username}&task=${payload?.task}&project_name=${payload?.project}&version=${payload?.version}&model=${payload.model}`
         );
-        console.log(response, "response.data")
+        // console.log(response, "response.data")
         if (response.status === 200) {
             return response.data;
         } else {
@@ -83,7 +83,7 @@ export const ReturnDefectHypertune = createAsyncThunk('defect/defecthypertune', 
     try {
         const response = await axios.get(`${url}get_config?username=${payload?.username}&task=${payload?.task}&project_name=${payload?.project_name}&version=${payload?.version}`
         );
-        console.log(response, "response.data")
+        // console.log(response, "response.data")
         if (response.status === 200) {
             return response;
         } else {

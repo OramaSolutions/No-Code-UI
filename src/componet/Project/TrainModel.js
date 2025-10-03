@@ -24,7 +24,7 @@ function TrainModel({ initialData, setState, onApply, userData, state, task, api
     const [flag, setFlag] = useState(false)
     const [taskId, setTaskId] = useState(null)
     // pollStatus and setPollStatus removed; handled in DataTransferModal
-    console.log(task)
+    // console.log(task)
     let url = getUrl(task)
 
 

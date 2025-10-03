@@ -11,7 +11,7 @@ export const useStepPersistence = (userData, projectState) => {
   const [currentStep, setCurrentStep] = useState('labelled');
   const [isLoading, setIsLoading] = useState(true);
   const token = userData?.token || '';
-  console.log('Project State in OD:', projectState);
+  // console.log('Project State in OD:', projectState);
   const fetchProjectStatus = async () => {
     try {
       setIsLoading(true);
@@ -28,7 +28,7 @@ export const useStepPersistence = (userData, projectState) => {
         }
       });
 
-      console.log('Project status response:', response);
+      // console.log('Project status response:', response);
 
       if (response.status === 200) {
         const { current_step, step_status } = response.data;

@@ -191,11 +191,12 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
     const DatasetSize = JSON.parse(window.localStorage.getItem("DataSize")) || {}
     const [iState, updateIstate] = useState(initialState)
     const { openModal, onClose, cropProb, cropX, cropY, rotation, crop, verticalFlip, horizontalFlip, brightness, contrast, stauration, noise, blur, rotate_limit, rotate_prob, vertical_flip_prob, horizontal_flip_prob, brightness_limit, brightness_prob, contrast_limit, contrast_prob, hue_saturation_limit, hue_saturation_prob, gauss_noise_var_limit, gauss_noise_prob, blur_limit, blur_prob, num_of_images_to_be_generated, isDirty } = iState
-    console.log(iState, "istateeeeee")
+    // console.log(iState, "istateeeeee")
     const abortControllerReff = useRef();
     const dispatch = useDispatch()
     const [sampleImageUrl, setSampleImageUrl] = useState(null);
 
+    // for return data
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -207,41 +208,17 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
                 }
                 const res = await dispatch(ReturnAgumentation({ payload, url }));
                 if (res?.payload?.status === 200) {
-                    const augData = res?.payload?.data?.augmentations
-                    // updateIstate((prev) => ({
-                    //     ...prev,
-                    //     rotation: augData?.rotate_limit ? true : false,
-                    //     crop: augData?.crop?.xmax ? true : false,
-                    //     verticalFlip: augData?.vertical_flip_prob ? true : false,
-                    //     horizontalFlip: augData?.horizontal_flip_prob ? true : false,
-                    //     brightness: augData?.brightness_limit?.[1] ? true : false,
-                    //     contrast: augData?.contrast_limit?.[1] ? true : false,
-                    //     stauration: augData?.hue_saturation_limit?.[1] ? true : false,
-                    //     noise: augData?.gauss_noise_var_limit?.[1] ? true : false,
-                    //     blur: augData?.blur_limit?.[1] ? true : false,
-                    //     rotate_limit: augData?.rotate_limit || 0,
-                    //     rotate_prob: augData?.rotate_prob || 0,
-                    //     vertical_flip_prob: augData?.vertical_flip_prob || 0,
-                    //     horizontal_flip_prob: augData?.horizontal_flip_prob || 0,
-                    //     brightness_limit: augData?.brightness_limit?.[1] || 5,
-                    //     brightness_prob: augData?.brightness_prob || 0,
-                    //     contrast_limit: augData?.contrast_limit?.[1] || 5,
-                    //     contrast_prob: augData?.contrast_prob || 0,
-                    //     hue_saturation_limit: augData?.hue_saturation_limit?.[1] || 5,
-                    //     hue_saturation_prob: augData?.hue_saturation_prob || 0,
-                    //     gauss_noise_var_limit: augData?.gauss_noise_var_limit?.[1] || 0,
-                    //     gauss_noise_prob: augData?.gauss_noise_prob || 0,
-                    //     blur_limit: augData?.blur_limit?.[1] || 0,
-                    //     blur_prob: augData?.blur_prob || 0,
-                    //     cropX: augData?.crop?.xmax || 0,
-                    //     cropY: augData?.crop?.ymax || 0,
-                    //     num_of_images_to_be_generated: augData?.num_of_images_to_be_generated || "1",
-                    //     cropProb: augData?.crop?.p || 0,
-                    //     isDirty: true,
-                    // }))
+                    // const augData = res?.payload?.data?.augmentations
 
-                    const asUpper = (v, fallback = 0) => Array.isArray(v) ? (v[1] ?? fallback) : (v ?? fallback);
 
+                    // const asUpper = (v, fallback = 0) => Array.isArray(v) ? (v[1] ?? fallback) : (v ?? fallback);
+                    const asUpper = (v, fallback) =>
+                        Array.isArray(v) ? (v[1] ?? fallback) : (v ?? fallback);
+                    const augData = res?.payload?.data?.augmentations ?? {};
+
+                    const noiseUpper = asUpper(augData?.gauss_noise_var_limit, undefined);
+                    const noiseOn =
+                        typeof noiseUpper === "number" && noiseUpper >= 10;
                     updateIstate((prev) => ({
                         ...prev,
                         rotation: !!augData?.rotate_limit,
@@ -251,7 +228,7 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
                         brightness: asUpper(augData?.brightness_limit, 0) > 0,
                         contrast: asUpper(augData?.contrast_limit, 0) > 0,
                         stauration: asUpper(augData?.hue_saturation_limit, 0) > 0,
-                        noise: asUpper(augData?.gauss_noise_var_limit, 10) >= 10,
+                        noise: noiseOn,
                         blur: !!augData?.blur_prob,
                         rotate_limit: augData?.rotate_limit ?? 0,
                         rotate_prob: augData?.rotate_prob ?? 0,
@@ -267,6 +244,7 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
                         gauss_noise_prob: clamp(augData?.gauss_noise_prob ?? 0, 0, 1),
                         blur_prob: clamp(augData?.blur_prob ?? 0, 0, 1),
                         cropProb: clamp(augData?.crop?.p ?? 0, 0, 1),
+                        num_of_images_to_be_generated: res?.payload?.data?.multiplier || "1",
                         isDirty: true,
                     }));
 
@@ -278,6 +256,7 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
         fetchData();
     }, [])
 
+    // for sample image
     useEffect(() => {
         const fetchSampleImage = async () => {
             try {
@@ -328,6 +307,39 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
 
     const buildAugPayload = (state) => {
         const merged = augmentationsConfig.reduce((acc, aug) => ({ ...acc, ...aug.toPayload(state) }), {});
+        // Prune inactive augmentations based on toggles
+        if (!state.rotation) {
+            delete merged.rotate_limit;
+            delete merged.rotate_prob;
+        }
+        if (!state.crop) {
+            delete merged.crop;
+        }
+        if (!state.verticalFlip) {
+            delete merged.vertical_flip_prob;
+        }
+        if (!state.horizontalFlip) {
+            delete merged.horizontal_flip_prob;
+        }
+        if (!state.brightness) {
+            delete merged.brightness_limit;
+            delete merged.brightness_prob;
+        }
+        if (!state.contrast) {
+            delete merged.contrast_limit;
+            delete merged.contrast_prob;
+        }
+        if (!state.stauration) {
+            delete merged.hue_saturation_limit;
+            delete merged.hue_saturation_prob;
+        }
+        if (!state.noise) {
+            delete merged.gauss_noise_var_limit;
+            delete merged.gauss_noise_prob;
+        }
+        if (!state.blur) {
+            delete merged.blur_prob;
+        }
         return { augmentations: sanitizePayload(merged) };
     };
 
@@ -355,7 +367,7 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
             try {
                 abortControllerReff.current = new AbortController();
                 updateIstate({ ...iState, openModal: true })
-              
+
 
                 const augmentations = buildAugPayload(iState);
                 const jsonString = JSON.stringify(augmentations);
@@ -369,7 +381,7 @@ function Augumentation({ initial, setIstate, state, userData, onApply, onChange,
                 formData.append("project", state?.name);
                 formData.append("task", "objectdetection");
                 formData.append("json_data", jsonString);
-                formData.append("num_of_images_to_be_generated", num_of_images_to_be_generated);
+                formData.append("multiplier", num_of_images_to_be_generated);
 
                 // for (let pair of formData.entries()) {
                 //     console.log(`${pair[0]}:`, pair[1]);

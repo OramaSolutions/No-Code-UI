@@ -12,7 +12,7 @@ const Dashboard = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { dashboardData, loader } = useSelector((state) => state.dashboard)
-    console.log(dashboardData, "dashboardData")
+    // console.log(dashboardData, "dashboardData")
     
     //===================================useEffect==========================================================
     useEffect(() => {

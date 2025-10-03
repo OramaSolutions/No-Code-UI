@@ -14,6 +14,7 @@ import { markStepChanged, clearStepChange } from '../../reduxToolkit/Slices/step
 import { getUrl } from "../../config/config";
 import { useStepPersistence } from './useStepPersistence';
 import Application from './Application'
+import Loader from '../../commonComponent/Loader'
 const url = getUrl('objectdetection')
 
 const initialState = {
@@ -21,8 +22,9 @@ const initialState = {
 }
 
 function ProjectTraining() {
+    console.log('Rendering ProjectTraining component');
     const dispatch = useDispatch();
-    const [iState, updateIstate] = useState("labelled");
+    const [iState, updateIstate] = useState(null);
     const userData = JSON.parse(window.localStorage.getItem("userLogin"))
     const { hasChangedSteps } = useSelector((state) => state.steps);
     const [completedSteps, setCompletedSteps] = useState({
@@ -35,7 +37,7 @@ function ProjectTraining() {
         remark: false
     });
     const { state } = useLocation();
-    console.log('state in OD', state)
+    // console.log('state in OD', state)
 
     const stepsOrder = ['labelled', 'augumented', 'images', 'dataSplit', 'HyperTune', 'infer', 'remark', 'application'];
     // Integrate useStepPersistence
@@ -118,15 +120,15 @@ function ProjectTraining() {
         }
     };
 
-    // Show loader while fetching status
-    if (isLoading) {
+    // Show loader while fetching status or before iState is set
+    if (isLoading || !iState) {
         return (
             <div>
                 <Header />
                 <Sidenav />
                 <div className="WrapperArea">
                     <div className="WrapperBox">
-                        <div>Loading project status...</div>
+                        <Loader />
                     </div>
                 </div>
             </div>

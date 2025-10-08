@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { MdDownload, MdCheck, MdError, MdHourglassBottom } from "react-icons/md";
 import axios from "axios";
 import { isLoggedIn } from "../../utils";
+import { useNavigate } from "react-router-dom";
 import { Url as NodeUrl } from "../../config/config";
 const POLLING_INTERVAL = 30000; // 30 seconds
 const token = isLoggedIn("userLogin");
@@ -26,6 +27,36 @@ const Application = ({ state, url, userData, username, task, project, version })
 
 // 1) Define a full shape for persisted build session
 const localStorageKey = `dockerBuild_${username}_${task}_${project}_${version}`;
+  const navigate = useNavigate();
+
+    useEffect(() => {
+    if (!token) {
+      navigate("/", { replace: true });
+    }
+  }, [token, navigate]);
+
+
+
+  const api = useRef(null);
+
+  useEffect(() => {
+    const instance = axios.create();
+    const reqId = instance.interceptors.request.use((config) => {
+      const freshToken = isLoggedIn("userLogin");
+      if (!freshToken) {
+        navigate("/", { replace: true });
+        // Cancel the request cleanly
+        return Promise.reject(new axios.Cancel("No token; redirected"));
+      }
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${freshToken}`;
+      return config;
+    });
+    api.current = instance;
+    return () => {
+      instance.interceptors.request.eject(reqId);
+    };
+  }, [navigate]);
 
 const persistSession = (data) => {
   const now = Date.now();
@@ -100,7 +131,7 @@ const fetchStatus = async (id, persistedOverride) => {
   }
 
   try {
-    const res = await axios.post(
+    const res = await api.current.post(
       `${url}status/${id}`,
       {
         username: persisted.username,
@@ -108,8 +139,7 @@ const fetchStatus = async (id, persistedOverride) => {
         task: persisted.task,
         name: persisted.project, 
         version: persisted.version,
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
+      }
     );
 
     const { status, result, error: apiError } = res.data || {};
@@ -184,10 +214,9 @@ const handleDownload = async (appTitle) => {
 
   try {
     console.log('token', token)
-    const response = await axios.post(
+    const response = await api.current.post(
       `${url}build-image-pri`,
-      { username, projectId, task, project, version },
-      { headers: { Authorization: `Bearer ${token}` } }
+      { username, projectId, task, project, version }
     );
 
     const { task_id } = response.data;

@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import { MdDownload, MdCheck, MdError, MdHourglassBottom } from "react-icons/md";
 import axios from "axios";
 import { isLoggedIn } from "../../utils";
+import { useNavigate } from "react-router-dom";
 import { Url as NodeUrl } from "../../config/config";
 const POLLING_INTERVAL = 30000; // 30 seconds
 const token = isLoggedIn("userLogin");
+
 const applications = [
   {
     id: 1,
@@ -24,227 +26,257 @@ const Application = ({ state, url, userData, username, task, project, version })
   const projectId = state?.projectId;
   // Key in localStorage to store task info for this specific project
 
-// 1) Define a full shape for persisted build session
-const localStorageKey = `dockerBuild_${username}_${task}_${project}_${version}`;
+  // 1) Define a full shape for persisted build session
+  const localStorageKey = `dockerBuild_${username}_${task}_${project}_${version}`;
 
-const persistSession = (data) => {
-  const now = Date.now();
-  const base = {
-    username,
-    projectId,
-    task,
-    project,
-    version,
-  };
-  localStorage.setItem(
-    localStorageKey,
-    JSON.stringify({ ...base, lastUpdated: now, ...data })
-  );
-};
+  const navigate = useNavigate();
 
-const readSession = () => {
-  const raw = localStorage.getItem(localStorageKey);
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    localStorage.removeItem(localStorageKey);
-    return null;
-  }
-};
-
-const clearSession = () => {
-  localStorage.removeItem(localStorageKey);
-};
-
-// 2) On mount: restore and resume polling strictly from persisted data
-useEffect(() => {
-  const saved = readSession();
-  if (saved) {
-    setTaskId(saved.taskId || null);
-    setBuildStatus(saved.status || null);
-    setBuildResult(saved.result || null);
-    // If we have a task that isn't done/error, resume polling
-    if (saved.taskId && saved.status !== 'done' && saved.status !== 'error') {
-      startPolling(saved.taskId, saved); // pass saved payload
+  useEffect(() => {
+    if (!token) {
+      console.log('token not')
+      navigate("/", { replace: true });
     }
-  }
-  return () => stopPolling();
-  
-}, []);
+  }, [token, navigate]);
 
-// 3) startPolling now accepts the persisted payload so it never depends on volatile props
-const startPolling = (id, persisted) => {
-  if (pollingRef.current) return;
-  fetchStatus(id, persisted);
-  pollingRef.current = setInterval(() => {
+
+
+  const api = useRef(null);
+
+  useEffect(() => {
+    const instance = axios.create();
+    const reqId = instance.interceptors.request.use((config) => {
+      const freshToken = isLoggedIn("userLogin");
+      if (!freshToken) {
+        navigate("/", { replace: true });
+        // Cancel the request cleanly
+        return Promise.reject(new axios.Cancel("No token; redirected"));
+      }
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${freshToken}`;
+      return config;
+    });
+    api.current = instance;
+    return () => {
+      instance.interceptors.request.eject(reqId);
+    };
+  }, [navigate]);
+
+  const persistSession = (data) => {
+    const now = Date.now();
+    const base = {
+      username,
+      projectId,
+      task,
+      project,
+      version,
+    };
+    localStorage.setItem(
+      localStorageKey,
+      JSON.stringify({ ...base, lastUpdated: now, ...data })
+    );
+  };
+
+  const readSession = () => {
+    const raw = localStorage.getItem(localStorageKey);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch {
+      localStorage.removeItem(localStorageKey);
+      return null;
+    }
+  };
+
+  const clearSession = () => {
+    localStorage.removeItem(localStorageKey);
+  };
+
+  // 2) On mount: restore and resume polling strictly from persisted data
+  useEffect(() => {
+    const saved = readSession();
+    if (saved) {
+      setTaskId(saved.taskId || null);
+      setBuildStatus(saved.status || null);
+      setBuildResult(saved.result || null);
+      // If we have a task that isn't done/error, resume polling
+      if (saved.taskId && saved.status !== 'done' && saved.status !== 'error') {
+        startPolling(saved.taskId, saved); // pass saved payload
+      }
+    }
+    return () => stopPolling();
+
+  }, []);
+
+  // 3) startPolling now accepts the persisted payload so it never depends on volatile props
+  const startPolling = (id, persisted) => {
+    if (pollingRef.current) return;
     fetchStatus(id, persisted);
-  }, POLLING_INTERVAL);
-};
-const stopPolling = () => {
+    pollingRef.current = setInterval(() => {
+      fetchStatus(id, persisted);
+    }, POLLING_INTERVAL);
+  };
+  const stopPolling = () => {
     if (pollingRef.current) {
       clearInterval(pollingRef.current);
       pollingRef.current = null;
     }
   };
 
-// 4) fetchStatus strictly uses persisted identity data, not transient component state
-const fetchStatus = async (id, persistedOverride) => {
-  const persisted = persistedOverride || readSession();
-  if (!id || !persisted) {
-    stopPolling(); // stop timer if context missing [web:46]
-    clearSession();
-    setTaskId(null);
-    setBuildStatus(null);
-    return;
-  }
-
-  try {
-    const res = await axios.post(
-      `${url}status/${id}`,
-      {
-        username: persisted.username,
-        projectId: persisted.projectId,
-        task: persisted.task,
-        name: persisted.project, // if API expects 'name' [web:60]
-        version: persisted.version,
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    const { status, result, error: apiError } = res.data || {};
-
-    // Accept only known statuses; otherwise treat as error
-    if (status === 'done') {
-      setBuildStatus('done');
-      stopPolling(); // end polling on completion [web:46]
-      setBuildResult(result);
-      persistSession({ taskId: id, status: 'done', result });
-      if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('Docker Build Complete', {
-          body: 'Your application is ready for download!',
-          icon: '/favicon.ico',
-        });
-      }
-      return;
-    }
-
-    if (status === 'running' || status === 'started') {
-      setBuildStatus(status);
-      persistSession({ taskId: id, status }); // keep session current [web:60]
-      return;
-    }
-
-    // status === 'error' OR unexpected/invalid payloads
-    const msg = apiError || 'Unexpected status from server';
-    setBuildStatus('error');
-    setError(msg);
-    persistSession({ taskId: id, status: 'error', error: msg });
-    stopPolling(); // stop on any error [web:46]
-  } catch (err) {
-    // Consolidated Axios error handling
-    let msg = 'Request failed';
-    if (err.response) {
-      // Server responded with non-2xx
-      msg = err.response.data?.message || `Server error: ${err.response.status}`; // show server message if present [web:60]
-    } else if (err.request) {
-      // Request made but no response (network/CORS/timeout)
-      msg = 'Network error. Please check connection and try again.'; // user-friendly network error [web:56]
-    } else {
-      // Something else setting up request
-      msg = err.message || 'Unexpected error occurred'; // generic fallback [web:60]
-    }
-
-    setBuildStatus('error');
-    setError(msg);
-    persistSession({ taskId: id, status: 'error', error: msg });
-    stopPolling(); // ensure interval is cleared on errors [web:46]
-
-    // Optional: special case for 404 task not found -> cleanup session
-    if (err.response?.status === 404) {
+  // 4) fetchStatus strictly uses persisted identity data, not transient component state
+  const fetchStatus = async (id, persistedOverride) => {
+    const persisted = persistedOverride || readSession();
+    if (!id || !persisted) {
+      stopPolling(); // stop timer if context missing [web:46]
       clearSession();
       setTaskId(null);
       setBuildStatus(null);
+      return;
     }
-  }
-};
 
+    try {
+      const res = await api.current.post(
+        `${url}status/${id}`,
+        {
+          username: persisted.username,
+          projectId: persisted.projectId,
+          task: persisted.task,
+          name: persisted.project, // if API expects 'name' [web:60]
+          version: persisted.version,
+        }
+      );
 
-// 5) On build start: persist everything upfront
-const handleDownload = async (appTitle) => {
-  if (!username || !task || !project || !version) {
-    alert('Missing required project information');
-    return;
-  }
+      const { status, result, error: apiError } = res.data || {};
 
-  if ('Notification' in window && Notification.permission === 'default') {
-    await Notification.requestPermission();
-  }
-  setError(null);
-
-  try {
-    const response = await axios.post(
-      `${url}build-image-pri`,
-      { username, projectId, task, project, version },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    const { task_id } = response.data;
-    setTaskId(task_id);
-    setBuildStatus('started');
-
-    // Persist full context immediately
-    persistSession({
-      taskId: task_id,
-      status: 'started',
-      result: null,
-      error: null,
-    });
-
-    startPolling(task_id, readSession());
-    alert(`Build started for ${appTitle}. This may take 20-30 minutes. You'll be notified when ready.`);
-  } catch (err) {
-    console.error('Error starting build:', err);
-    setError(err.response?.data?.message || 'Failed to start build. Please try again.');
-  }
-};
-
-// 6) Direct download should read from persisted result if state is empty
-const handleDirectDownload = async () => {
-  const session = readSession();
-  const _result = buildResult || session?.result;
-  const _status = buildStatus || session?.status;
-
-  if (_result?.zip_filename && _status === 'done') {
-    const { data } = await axios.get(
-      `${NodeUrl}projects/get-download-url/${encodeURIComponent(_result.zip_filename)}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        params: {
-          username: session?.username || username,
-          task: session?.task || task,
-          project: session?.project || project,
-          version: session?.version || version,
-          projectId: session?.projectId || projectId,
-        },
+      // Accept only known statuses; otherwise treat as error
+      if (status === 'done') {
+        setBuildStatus('done');
+        stopPolling(); // end polling on completion [web:46]
+        setBuildResult(result);
+        persistSession({ taskId: id, status: 'done', result });
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('Docker Build Complete', {
+            body: 'Your application is ready for download!',
+            icon: '/favicon.ico',
+          });
+        }
+        return;
       }
-    );
-    const downloadUrl = `${url}${data.url}`;
-    window.location.href = downloadUrl;
-  } else {
-    alert('Build is not ready to download yet.');
-  }
-};
 
-// 7) Clear: wipe storage and state
-const clearBuildStatus = () => {
-  clearSession();
-  setTaskId(null);
-  setBuildStatus(null);
-  setError(null);
-  setBuildResult(null);
-  stopPolling();
-};
+      if (status === 'running' || status === 'started') {
+        setBuildStatus(status);
+        persistSession({ taskId: id, status }); // keep session current [web:60]
+        return;
+      }
+
+      // status === 'error' OR unexpected/invalid payloads
+      const msg = apiError || 'Unexpected status from server';
+      setBuildStatus('error');
+      setError(msg);
+      persistSession({ taskId: id, status: 'error', error: msg });
+      stopPolling(); // stop on any error [web:46]
+    } catch (err) {
+      // Consolidated Axios error handling
+      let msg = 'Request failed';
+      if (err.response) {
+        // Server responded with non-2xx
+        msg = err.response.data?.message || `Server error: ${err.response.status}`; // show server message if present [web:60]
+      } else if (err.request) {
+        // Request made but no response (network/CORS/timeout)
+        msg = 'Network error. Please check connection and try again.'; // user-friendly network error [web:56]
+      } else {
+        // Something else setting up request
+        msg = err.message || 'Unexpected error occurred'; // generic fallback [web:60]
+      }
+
+      setBuildStatus('error');
+      setError(msg);
+      persistSession({ taskId: id, status: 'error', error: msg });
+      stopPolling(); // ensure interval is cleared on errors [web:46]
+
+      // Optional: special case for 404 task not found -> cleanup session
+      if (err.response?.status === 404) {
+        clearSession();
+        setTaskId(null);
+        setBuildStatus(null);
+      }
+    }
+  };
+
+
+  // 5) On build start: persist everything upfront
+  const handleDownload = async (appTitle) => {
+    if (!username || !task || !project || !version) {
+      alert('Missing required project information');
+      return;
+    }
+
+    if ('Notification' in window && Notification.permission === 'default') {
+      await Notification.requestPermission();
+    }
+    setError(null);
+
+    try {
+      const response = await api.current.post(
+        `${url}build-image-pri`,
+        { username, projectId, task, project, version }
+      );
+
+      const { task_id } = response.data;
+      setTaskId(task_id);
+      setBuildStatus('started');
+
+      // Persist full context immediately
+      persistSession({
+        taskId: task_id,
+        status: 'started',
+        result: null,
+        error: null,
+      });
+
+      startPolling(task_id, readSession());
+      alert(`Build started for ${appTitle}. This may take 20-30 minutes. You'll be notified when ready.`);
+    } catch (err) {
+      console.error('Error starting build:', err);
+      setError(err.response?.data?.message || 'Failed to start build. Please try again.');
+    }
+  };
+
+  // 6) Direct download should read from persisted result if state is empty
+  const handleDirectDownload = async () => {
+    const session = readSession();
+    const _result = buildResult || session?.result;
+    const _status = buildStatus || session?.status;
+
+    if (_result?.zip_filename && _status === 'done') {
+      const { data } = await axios.get(
+        `${NodeUrl}projects/get-download-url/${encodeURIComponent(_result.zip_filename)}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: {
+            username: session?.username || username,
+            task: session?.task || task,
+            project: session?.project || project,
+            version: session?.version || version,
+            projectId: session?.projectId || projectId,
+          },
+        }
+      );
+      const downloadUrl = `${url}${data.url}`;
+      window.location.href = downloadUrl;
+    } else {
+      alert('Build is not ready to download yet.');
+    }
+  };
+
+  // 7) Clear: wipe storage and state
+  const clearBuildStatus = () => {
+    clearSession();
+    setTaskId(null);
+    setBuildStatus(null);
+    setError(null);
+    setBuildResult(null);
+    stopPolling();
+  };
 
 
   const getStatusIcon = () => {

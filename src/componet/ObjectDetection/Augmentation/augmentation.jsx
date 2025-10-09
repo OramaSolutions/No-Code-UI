@@ -186,7 +186,7 @@ const initialState = {
 }
 
 
-function Augumentation({  state, userData, onApply, onChange, url }) {
+function Augumentation({ initial, setIstate, state, userData, onApply, onChange, url }) {
     const { hasChangedSteps } = useSelector((state) => state.steps);
     const DatasetSize = JSON.parse(window.localStorage.getItem("DataSize")) || {}
     const [iState, updateIstate] = useState(initialState)

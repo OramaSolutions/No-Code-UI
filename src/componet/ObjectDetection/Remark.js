@@ -14,7 +14,7 @@ const initialState = {
 const url = getUrl('objectdetection')
 
                       
-const DefectRemark = ({username, task,project, version,onApply ,onChange}) => {
+const DefectRemark = ({iState,username, task,project, version,onApply ,onChange}) => {
     const [istate, updateIstate] = useState(initialState);
     const { observation, scopeOfImprovement, numOfTries, loading } = istate;
     const [files, setFiles] = useState([]); // general files

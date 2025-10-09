@@ -14,7 +14,7 @@ import MyAccout from './componet/Account/MyAccout.js';
 import ChangePassword from './componet/Account/ChangePassword.js';
 import Support from './componet/Support/Support.js';
 import Project from './componet/Project/Project.js';
-import ProjectTraining from './componet/ObjectDetection/Training.js';
+import ProjectTraining from './componet/ObjectDetection/Training.tsx';
 import ProjectManagement from './componet/OpenProject.js/ProjectManagement.js';
 import ClassificationTraining from './componet/Classification/ClassificationTraining.js';
 import DefectTraining from './componet/DefectDetection/DefectTraining.js';

@@ -42,7 +42,7 @@ function Header() {
                         <a>
                             <img src={require("../assets/images/bell-icon.png")} />
                         </a>
-                        <ul class="dropdown-menu Notification scroll">
+                        <ul className="dropdown-menu Notification scroll">
                             {notificationData?.result?.length > 0 &&
                                 notificationData?.result?.map((item, i) => {
                                     return (

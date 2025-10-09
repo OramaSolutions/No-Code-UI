@@ -15,7 +15,7 @@ const applications = [
   },
 ];
 
-const Application = ({ state, url, userData, username, task, project, version }) => {
+const Application = ({ state, url,  username, task, project, version }) => {
   const [selectedApp, setSelectedApp] = useState(null);
   const [taskId, setTaskId] = useState(null);
   const [buildStatus, setBuildStatus] = useState(null); // 'started', 'running', 'done', 'error'

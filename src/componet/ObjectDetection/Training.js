@@ -27,6 +27,7 @@ function ProjectTraining() {
     const [iState, updateIstate] = useState(null);
     const userData = JSON.parse(window.localStorage.getItem("userLogin"))
     const { hasChangedSteps } = useSelector((state) => state.steps);
+    console.log('This is the hasChangedStep object >>>', hasChangedSteps)
     const [completedSteps, setCompletedSteps] = useState({
         labelled: false,
         augumented: false,

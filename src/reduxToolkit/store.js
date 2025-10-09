@@ -4,7 +4,7 @@ import projectSlice from "../reduxToolkit/Slices/projectSlices.js"
 import openSlice from "../reduxToolkit/Slices/openSlices.js"
 import dashboardSlice from "../reduxToolkit/Slices/dashboardSlices.js"
 import notificationSlice from "../reduxToolkit/Slices/notificationSlices.js"
-import stepSlice from "../reduxToolkit/Slices/stepSlices.js"
+import stepSlice from "../reduxToolkit/Slices/stepSlices"
 import classificationSlice from "../reduxToolkit/Slices/classificationSlices.js"
 import defectSlice from "../reduxToolkit/Slices/defectSlices.js"
 

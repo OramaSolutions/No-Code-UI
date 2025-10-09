@@ -22,54 +22,14 @@ const initialState = {
     closeImport: false,
 }
 
-function Labelled({ iState, updateIstate, userData, state, onApply, onChange, url }) {
+function Labelled({ userData, state, onApply, onChange, url }) {
     const [istate, setIstate] = useState(initialState)
     const { imageUrls, imageFolder, loading, resizecheck, width, open, close, openImport, closeImport } = istate;
     const [isDirty, setIsDirty] = useState("")
     const [selectedFile, setSelectedFile] = useState(null);
     const abortControllerReff = useRef();
     const dispatch = useDispatch();
-    // console.log('url', url)
-
-    // useEffect(() => {
-    //     const fetchAndSaveStreamingZip = async () => {
-    //         console.log('fetch and save streaming zip called in the useEffect')
-    //         try {
-    //             const response = await fetch(`${url}return_import_dataset?username=${userData?.activeUser?.userName}&task=objectdetection&project=${state?.name}&version=${state?.version}`, {
-    //                 method: 'GET',
-    //             });
-    //             console.log("responseeee",response)
-    //             if (!response.ok) {
-    //                 throw new Error(`HTTP error! status: ${response.status}`);
-    //             }
-    //             const datasize = {
-    //                 Size: response,
-
-    //             }
-    //             console.log('setting dataset size', imageUrls.length)
-    //             window.localStorage.setItem("DataSize", JSON.stringify(datasize))
-
-    //             const filename = response.headers.get('x-filename') || 'default_filename.zip';
-    //             const reader = response.body.getReader();
-    //             const chunks = [];
-    //             while (true) {
-    //                 const { done, value } = await reader.read();
-    //                 if (done) break;
-    //                 chunks.push(value);
-    //             }
-    //             const zipBlob = new Blob(chunks, { type: 'application/zip' });
-    //             const dummyData = new File([zipBlob], filename, { type: 'application/zip' });
-    //             setIsDirty(filename)
-    //             setSelectedFile(dummyData);
-    //             processZipFileInWorker(dummyData);
-    //         } catch (err) {
-    //             console.log(err, "errrrrr")
-    //         }
-    //     }
-    //     fetchAndSaveStreamingZip();
-
-
-    // }, [])
+   
 
     useEffect(() => {
     const fetchThumbnails = async () => {

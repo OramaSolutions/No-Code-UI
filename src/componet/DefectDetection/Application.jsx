@@ -5,7 +5,7 @@ import { isLoggedIn } from "../../utils";
 import { useNavigate } from "react-router-dom";
 import { Url as NodeUrl } from "../../config/config";
 const POLLING_INTERVAL = 30000; // 30 seconds
-const token = isLoggedIn("userLogin");
+// const token = isLoggedIn("userLogin");
 
 const applications = [
   {
@@ -28,15 +28,18 @@ const Application = ({ state, url, userData, username, task, project, version })
 
   // 1) Define a full shape for persisted build session
   const localStorageKey = `dockerBuild_${username}_${task}_${project}_${version}`;
-
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!token) {
-      console.log('token not')
+    const token = isLoggedIn("userLogin");
+    if (token) {
+      setIsAuthenticated(true);
+    } else {
+      console.log('No token found, redirecting to login');
       navigate("/", { replace: true });
     }
-  }, [token, navigate]);
+  }, [navigate]);
 
 
 
@@ -47,7 +50,7 @@ const Application = ({ state, url, userData, username, task, project, version })
     const reqId = instance.interceptors.request.use((config) => {
       const freshToken = isLoggedIn("userLogin");
       if (!freshToken) {
-        navigate("/", { replace: true });
+        // navigate("/", { replace: true });
         // Cancel the request cleanly
         return Promise.reject(new axios.Cancel("No token; redirected"));
       }
@@ -59,7 +62,7 @@ const Application = ({ state, url, userData, username, task, project, version })
     return () => {
       instance.interceptors.request.eject(reqId);
     };
-  }, [navigate]);
+  }, []);
 
   const persistSession = (data) => {
     const now = Date.now();
@@ -246,7 +249,7 @@ const Application = ({ state, url, userData, username, task, project, version })
     const session = readSession();
     const _result = buildResult || session?.result;
     const _status = buildStatus || session?.status;
-
+    const token = isLoggedIn("userLogin");
     if (_result?.zip_filename && _status === 'done') {
       const { data } = await axios.get(
         `${NodeUrl}projects/get-download-url/${encodeURIComponent(_result.zip_filename)}`,

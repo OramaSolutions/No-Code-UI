@@ -110,7 +110,7 @@ function Defectlabelled({ iState, updateIstate, userData, state, onApply, onChan
         formData.append("file", selectedFile);
         formData.append("username", userData?.activeUser?.userName);
         formData.append("version", state?.version);
-        formData.append("project_name", state?.name);
+        formData.append("project", state?.name);
         formData.append("task", "defectdetection");
 
         try {
